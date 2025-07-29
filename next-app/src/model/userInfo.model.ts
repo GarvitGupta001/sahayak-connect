@@ -3,9 +3,11 @@ import bcrypt from "bcryptjs";
 
 export interface UserInfo extends Document {
   _id: string;
+  userId: Schema.Types.ObjectId;
   name: string;
   email?: string;
   age: number;
+  gender: "Male" | "Female" | "Other";
   preferredLanguage: string;
   emailVerified?: boolean;
 
@@ -63,6 +65,12 @@ export interface UserInfo extends Document {
 }
 
 const userInfoSchema = new Schema<UserInfo>({
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "users",
+    required: true,
+  },
+
   name: {
     type: String,
     required: [true, "Name is required"],
@@ -85,6 +93,12 @@ const userInfoSchema = new Schema<UserInfo>({
     required: [true, "Age is required"],
     min: [18, "Must be at least 18 years old"],
     max: [120, "Invalid age"],
+  },
+
+  gender: {
+    type: String,
+    required: true,
+    enum: ["Male", "Female", "Other"],
   },
 
   preferredLanguage: {

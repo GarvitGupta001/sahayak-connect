@@ -1,14 +1,19 @@
-'use client'
+"use client";
 
-import * as React from 'react';
-import { useTheme } from '@mui/material/styles';
-import MobileStepper from '@mui/material/MobileStepper';
-import Button from '@mui/material/Button';
-import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import * as React from "react";
+import MobileStepper from "@mui/material/MobileStepper";
+import Button from "@mui/material/Button";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import {
+  PersonalDetailsForm,
+  DemographicsForm,
+  EducationForm,
+  IncomeForm,
+  LocationForm,
+} from "@/components/forms";
 
 export default function DetailsForm() {
-  const theme = useTheme();
   const [activeStep, setActiveStep] = React.useState(0);
 
   const handleNext = () => {
@@ -20,32 +25,29 @@ export default function DetailsForm() {
   };
 
   return (
-    <MobileStepper
-      variant="progress"
-      steps={6}
-      position="static"
-      activeStep={activeStep}
-      sx={{ maxWidth: 400, flexGrow: 1 }}
-      nextButton={
-        <Button size="small" onClick={handleNext} disabled={activeStep === 5}>
-          Next
-          {theme.direction === 'rtl' ? (
+    <>
+      <MobileStepper
+        variant="progress"
+        steps={6}
+        position="static"
+        activeStep={activeStep}
+        sx={{ maxWidth: "100%" }}
+        nextButton={
+          <Button size="small" onClick={handleNext} disabled={activeStep === 5}>
+            {activeStep >= 4 ? "Submit" : <KeyboardArrowRight />}
+          </Button>
+        }
+        backButton={
+          <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
             <KeyboardArrowLeft />
-          ) : (
-            <KeyboardArrowRight />
-          )}
-        </Button>
-      }
-      backButton={
-        <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
-          {theme.direction === 'rtl' ? (
-            <KeyboardArrowRight />
-          ) : (
-            <KeyboardArrowLeft />
-          )}
-          Back
-        </Button>
-      }
-    />
+          </Button>
+        }
+      />
+      {activeStep === 0 && <PersonalDetailsForm />}
+      {activeStep === 1 && <DemographicsForm />}
+      {activeStep === 2 && <EducationForm />}
+      {activeStep === 3 && <IncomeForm />}
+      {activeStep === 4 && <LocationForm />}
+    </>
   );
 }
