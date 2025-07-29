@@ -6,5 +6,5 @@ export default function DetailsLayout({
   children: React.ReactNode;
 }) {
   //TODO: Add Protect Wrapper
-  return {children};
+  return <>{children}</>;
 }
