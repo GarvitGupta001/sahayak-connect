@@ -67,7 +67,11 @@ export default function PersonalDetailsForm() {
             type="number"
             variant="outlined"
             value={formData.age}
-            onChange={(e) => handleInputChange('age', parseInt(e.target.value) || 18)}
+            onChange={(e) => {
+              const val = e.target.value;
+              const parsed = parseInt(val);
+              handleInputChange('age', (!isNaN(parsed) && val !== '') ? parsed : 18);
+            }}
             inputProps={{ min: 18, max: 120 }}
             required
             sx={{ flex: 1 }}

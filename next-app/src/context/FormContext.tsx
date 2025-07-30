@@ -102,13 +102,19 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children }) => {
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
-        setFormData(parsedData);
+        // Validate that parsedData has the expected structure
+        if (parsedData && typeof parsedData === 'object' && 'name' in parsedData) {
+          setFormData(parsedData);
+        } else {
+          console.warn('Invalid saved form data structure, using defaults');
+        }
       } catch (error) {
         console.error('Error parsing saved form data:', error);
+        // Optionally clear corrupted data
+        localStorage.removeItem('userFormData');
       }
     }
   }, []);
-
   // Save data to localStorage whenever formData changes
   useEffect(() => {
     localStorage.setItem('userFormData', JSON.stringify(formData));
