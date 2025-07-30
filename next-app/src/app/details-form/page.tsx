@@ -12,6 +12,7 @@ import {
   IncomeForm,
   LocationForm,
 } from "@/components/forms";
+import { FormProvider } from "@/context/FormContext";
 
 export default function DetailsForm() {
   const [activeStep, setActiveStep] = React.useState(0);
@@ -25,7 +26,7 @@ export default function DetailsForm() {
   };
 
   return (
-    <>
+    <FormProvider>
       <MobileStepper
         variant="progress"
         steps={6}
@@ -48,6 +49,6 @@ export default function DetailsForm() {
       {activeStep === 2 && <EducationForm />}
       {activeStep === 3 && <IncomeForm />}
       {activeStep === 4 && <LocationForm />}
-    </>
+    </FormProvider>
   );
 }
