@@ -1,18 +1,22 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Loader from "@/components/Loader";
+
 
 export default function ProtectWrapper({ children }) {
     const router = useRouter();
-
-    const token = localStorage.getItem("token") || "";
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const token = localStorage.getItem("token") || "";
         if (!token) {
             router.push("/sign-in");
+        } else {
+            setLoading(false);
         }
     }, []);
 
-    return <>{children}</>;
+    return <>{loading ? <Loader /> : children}</>;
 }

@@ -43,7 +43,7 @@ export async function POST(request) {
                 { _id: user._id },
                 process.env.JWT_SECRET || ""
             );
-            return NextResponse.json(
+            const response = NextResponse.json(
                 {
                     success: true,
                     message: "USER_CREATED",
@@ -57,6 +57,8 @@ export async function POST(request) {
                     status: 201,
                 }
             );
+            response.cookies.set("token", token);
+            return response;
         } else {
             if (await user.comparePassword(password)) {
                 const token = jwt.sign(
@@ -69,6 +71,7 @@ export async function POST(request) {
                         message: "USER_LOGGED_IN",
                         token: token,
                         user: {
+                            _id: user._id,
                             phone: user.phone,
                             profileComplete: user.profileComplete,
                         },
