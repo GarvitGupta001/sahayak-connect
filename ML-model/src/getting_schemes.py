@@ -11,16 +11,15 @@ import pandas as pd
 from tqdm import tqdm
 import string
 tqdm.pandas()
-import spacy
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
 import matplotlib.pyplot as plt
-import seaborn as sns
-from transformers import BertTokenizer
+# import seaborn as sns
+# from transformers import BertTokenizer
 import nltk
 from nltk.corpus import stopwords
 import string
-import keras_nlp
+# import keras_nlp
 import numpy as np
 
 from google.colab import drive
