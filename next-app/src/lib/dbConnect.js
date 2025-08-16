@@ -1,12 +1,8 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-interface Connerction {
-    isConnected: number;
-}
-
-const connection: Connerction = {
+const connection = {
     isConnected: 0
-}
+};
 
 async function connectDB() {
     if (connection.isConnected) {
