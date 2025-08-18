@@ -22,17 +22,12 @@ import string
 # import keras_nlp
 import numpy as np
 
-from google.colab import drive
-drive.mount('/content/drive')
-
-cd /content/drive/MyDrive/Hackathon
-
 """**IMPORTING PKL FILE OF EDITED CSV**
 
 A column(embeddings) which was MiniLM embedding of information
 """
 
-df = pd.read_pickle("embeddings_new.pkl")
+df = pd.read_pickle("ML-model\src\embeddings_new.pkl")
 
 import ast
 
@@ -74,17 +69,31 @@ output
 null_embeddings_indices = df[df['embeddings'].isnull()].index.tolist()
 
 null_embeddings_indices
+# def get_api_response(text):  
+#   import google.generativeai as genai
+#   genai.configure(api_key="AIzaSyBiGcdP5rHCA6NWiDTrsTSv9ELnYvCznFA")
+#   model = genai.GenerativeModel("gemini-2.5-flash")
+#   response=model.generate_content(f"""
+#   this dataset have just 5 rows, display the schemes, followed by corresponding details, benefits,and documents required
+#   {output}
+#   only the info of this data should be given as output, nothing else
+#   make it look easy to read for a normal person, make sure the output is in a json format
+#   and the keys should be scheme_name, details, benefits, schemeCategory. nothing else should be there in the output
+#   """)
+#   return response.text
 
-from google import genai
+from flask import Flask,jsonify
+import json
+app = Flask(__name__)
+@app.route('/<string:text>')
+def application(text):
+    # data=json.loads(get_api_response(text))
+    # return jsonify(data)
+    sentence_emb = model.encode([text], convert_to_tensor=True)
+    data = get_schemes(sentence_emb, df)
+    output = data[["scheme_name", "details", "benefits", "schemeCategory"]]
+    return output.to_json(orient='records', force_ascii=False)
 
-client = genai.Client(api_key="AIzaSyBiGcdP5rHCA6NWiDTrsTSv9ELnYvCznFA")
 
-response = client.models.generate_content(
-    model="gemini-2.5-flash", contents=f"""
-this dataset have just 5 rows, display the schemes, followed by corresponding details, benefits,and documents required
-{output}
-only the info of this data should be given as output, nothing else
-make it look easy to read for a normal person
-"""
-)
-print(response.text)
+if __name__ == "__main__":
+    app.run(debug=True)
