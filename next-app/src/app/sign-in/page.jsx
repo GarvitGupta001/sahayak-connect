@@ -14,9 +14,12 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { useUserContext } from "@/hooks/useUserContext";
 
 export default function SignIn() {
     const router = useRouter();
+
+    const { setUser } = useUserContext();
 
     const [password, setPassword] = useState("");
     const [phone, setPhone] = useState("");
@@ -41,11 +44,12 @@ export default function SignIn() {
             if (response.status === 200 || response.status === 201) {
                 setLoading(false);
                 setErroMessage({ phone: "", password: "" });
+                setUser(response.data.user);
                 localStorage.setItem("token", response.data.token);
                 if (response.data.user.profileComplete) {
-                    router.push("/app/home");
+                    router.replace("/app/home");
                 } else {
-                    router.push("/details-form");
+                    router.replace("/details-form");
                 }
             }
         } catch (error) {

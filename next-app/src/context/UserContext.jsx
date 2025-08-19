@@ -1,12 +1,16 @@
 "use client";
 
-import { createContext, useState } from "react";
+import axios from "axios";
+import { createContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 
 export const UserContext = createContext(undefined);
 
 export function UserProvider({ children }) {
-    const [user, setUser] = useState({});
+    const router = useRouter();
 
+    const [user, setUser] = useState({});
     const [personalDetails, setPersonalDetails] = useState({
         name: "",
         email: "",
@@ -14,7 +18,6 @@ export function UserProvider({ children }) {
         gender: "",
         preferredLanguage: "",
     });
-
     const [demographics, setDemographics] = useState({
         category: "",
         maritalStatus: "",
@@ -22,27 +25,75 @@ export function UserProvider({ children }) {
         religion: "",
         caste: "",
     });
-
     const [education, setEducation] = useState({
         level: "",
         field: "",
         institution: "",
         graduationYear: "",
     });
-
     const [income, setIncome] = useState({
         annual: "",
         source: "",
         verified: false,
         lastUpdated: "",
     });
-
     const [location, setLocation] = useState({
         state: "",
         district: "",
         pincode: "",
         address: "",
     });
+
+    useEffect(() => {
+        const verifyAndFetchUser = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                return;
+            }
+
+            try {
+                const verifyResponse = await axios.post("/api/verify-token", {
+                    token,
+                });
+                if (!verifyResponse.data.success) {
+                    throw new Error("Token verification failed");
+                }
+                const decoded = verifyResponse.data.decoded;
+
+                const userResponse = await axios.get(
+                    `/api/user/${decoded._id}`
+                );
+                if (!userResponse.data.success) {
+                    throw new Error("Failed to fetch user");
+                }
+                const fetchedUser = userResponse.data.user;
+                setUser(fetchedUser);
+
+                if (fetchedUser.profileComplete) {
+                    const detailsResponse = await axios.get(
+                        `/api/user-details/${fetchedUser._id}`,
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
+                        }
+                    );
+                    if (detailsResponse.data.success) {
+                        setPersonalDetails(
+                            detailsResponse.data.personalDetails
+                        );
+                        setDemographics(detailsResponse.data.demographics);
+                        setEducation(detailsResponse.data.education);
+                        setIncome(detailsResponse.data.income);
+                        setLocation(detailsResponse.data.location);
+                    }
+                }
+            } catch (error) {
+                console.error("Authentication failed:", error);
+                localStorage.removeItem("token");
+            }
+        };
+
+        verifyAndFetchUser();
+    }, []);
 
     return (
         <UserContext.Provider

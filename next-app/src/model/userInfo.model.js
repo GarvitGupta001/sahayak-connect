@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 const userInfoSchema = new Schema({
-    userId: {
+    userID: {
         type: Schema.Types.ObjectId,
         ref: "users",
         required: true,
@@ -69,14 +69,11 @@ const userInfoSchema = new Schema({
         },
         district: {
             type: String,
-            required: [true, "District is required"],
         },
         pincode: {
             type: String,
-            required: [true, "Pincode is required"],
             match: [/^\d{6}$/, "Invalid pincode format"],
         },
-        address: String,
     },
 
     demographics: {
@@ -84,11 +81,6 @@ const userInfoSchema = new Schema({
             type: String,
             required: true,
             enum: ["General", "OBC", "SC", "ST", "EWS"],
-        },
-        gender: {
-            type: String,
-            required: true,
-            enum: ["Male", "Female", "Other"],
         },
         maritalStatus: {
             type: String,
@@ -127,7 +119,6 @@ const userInfoSchema = new Schema({
         },
         lastUpdated: {
             type: Date,
-            default: Date.now,
         },
     },
 
@@ -146,14 +137,7 @@ const userInfoSchema = new Schema({
         },
         field: String,
         institution: String,
-        graduationYear: {
-            type: Number,
-            min: [1950, "Invalid graduation year"],
-            max: [
-                new Date().getFullYear(),
-                "Future graduation year not allowed",
-            ],
-        },
+        graduationYear: Number,
     },
 
     aiAttributes: {
@@ -167,5 +151,7 @@ const userInfoSchema = new Schema({
     },
 });
 
-export const UserInfo =
+const UserInfo =
     mongoose.models.userInfo || mongoose.model("userInfo", userInfoSchema);
+
+export default UserInfo;

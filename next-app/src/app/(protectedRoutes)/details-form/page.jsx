@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect, useContext } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import MobileStepper from "@mui/material/MobileStepper";
 import Button from "@mui/material/Button";
@@ -14,13 +15,17 @@ import {
     IncomeForm,
     LocationForm,
 } from "@/components/forms";
+import Loader from "@/components/Loader";
 
-import { UserContext } from "@/context/UserContext";
+import { useUserContext } from "@/hooks/useUserContext";
 
 export default function DetailsForm() {
+    const router = useRouter();
     const [activeStep, setActiveStep] = useState(0);
+    const [loading, setLoading] = useState(true);
 
     const {
+        user,
         personalDetails,
         setPersonalDetails,
         demographics,
@@ -31,7 +36,7 @@ export default function DetailsForm() {
         setIncome,
         location,
         setLocation,
-    } = useContext(UserContext);
+    } = useUserContext();
 
     const handleNext = () => {
         switch (activeStep) {
@@ -84,19 +89,26 @@ export default function DetailsForm() {
             income: {
                 ...income,
                 annual: Number(income.annual),
-                lastUpdated: new Date(income.lastUpdated),
             },
             location,
         };
-
-        // Here you would typically send the data to your API
-        // For now, just save to localStorage
-        const response = await axios.post("/api/user-details", allFormData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+        console.log(user);
+        const response = await axios.post(
+            `/api/user-details/${user._id}`,
+            allFormData,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            }
+        );
         console.log(response.data);
+        router.replace("/app/home");
+        localStorage.removeItem("personalDetails");
+        localStorage.removeItem("demographics");
+        localStorage.removeItem("education");
+        localStorage.removeItem("income");
+        localStorage.removeItem("location");
 
         alert("Form submitted successfully!");
     };
@@ -146,6 +158,14 @@ export default function DetailsForm() {
             setLocation(JSON.parse(savedLocation));
         }
     }, []);
+
+    useEffect(() => {
+        if (!user.profileComplete) {
+            setLoading(false);
+        } else {
+            router.replace("/app/home");
+        }
+    }, [user.profileComplete]);
 
     return (
         <div className="h-screen w-screen">

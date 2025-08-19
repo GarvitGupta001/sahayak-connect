@@ -61,13 +61,7 @@ export const LOCATION_FORM = {
         type: INPUT_TYPES.TEXT,
         required: false,
         full_width: true,
-    },
-    address: {
-        label: "Address",
-        type: INPUT_TYPES.TEXT,
-        required: false,
-        full_width: true,
-    },
+    }
 };
 
 export const DEMOGRAPHICS_FORM = {
@@ -118,7 +112,7 @@ export const DEMOGRAPHICS_FORM = {
 
 export const INCOME_FORM = {
     annual: {
-        label: "Annual Income",
+        label: "Annual Income (approx)",
         type: INPUT_TYPES.NUMBER,
         required: true,
         full_width: true,
