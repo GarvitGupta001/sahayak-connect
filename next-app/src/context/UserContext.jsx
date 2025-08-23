@@ -2,15 +2,14 @@
 
 import axios from "axios";
 import { createContext, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-
+import Loader from "@/components/Loader";
 
 export const UserContext = createContext(undefined);
 
 export function UserProvider({ children }) {
-    const router = useRouter();
+    const [loading, setLoading] = useState(false);
 
-    const [user, setUser] = useState({});
+    const [user, setUser] = useState(null);
     const [personalDetails, setPersonalDetails] = useState({
         name: "",
         email: "",
@@ -59,7 +58,7 @@ export function UserProvider({ children }) {
                     throw new Error("Token verification failed");
                 }
                 const decoded = verifyResponse.data.decoded;
-
+                await new Promise((resolve) => setTimeout(resolve, 2000));
                 const userResponse = await axios.get(
                     `/api/user/${decoded._id}`
                 );
@@ -88,11 +87,14 @@ export function UserProvider({ children }) {
                 }
             } catch (error) {
                 console.error("Authentication failed:", error);
-                localStorage.removeItem("token");
             }
         };
-
-        verifyAndFetchUser();
+        const handleLoader = async () => {
+            setLoading(true)
+            await verifyAndFetchUser()
+            setLoading(false)
+        }
+        handleLoader()
     }, []);
 
     return (
@@ -112,7 +114,7 @@ export function UserProvider({ children }) {
                 setLocation,
             }}
         >
-            {children}
+            {loading ? <Loader /> : children}
         </UserContext.Provider>
     );
 }
