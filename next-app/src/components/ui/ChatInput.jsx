@@ -10,7 +10,7 @@ import { useState, useRef, useEffect } from "react";
 import { useUserContext } from "@/hooks/useUserContext";
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 
-const ChatInput = () => {
+const ChatInput = ({ onSend, disabled }) => {
     const [textInput, setTextInput] = useState("");
     const [isRecording, setIsRecording] = useState(false);
     const mediaRecorderRef = useRef(null);
@@ -22,7 +22,7 @@ const ChatInput = () => {
     const startRecording = async () => {
         const currentText = textInput.trim();
         const prefix = currentText ? currentText + " " : "";
-        console.log("Prefix:", prefix)
+        console.log("Prefix:", prefix);
         transcriptRef.current = prefix;
         console.log("Attempting to start recording...");
         try {
@@ -131,6 +131,7 @@ const ChatInput = () => {
                     paddingX: "16px",
                     paddingY: "4px",
                 }}
+                disabled={disabled}
                 type="text"
                 fullWidth={true}
                 placeholder="Ask your scheme..."
@@ -148,10 +149,16 @@ const ChatInput = () => {
                             onClick={
                                 isRecording ? stopRecording : startRecording
                             }
+                            disabled={disabled}
                         >
                             {isRecording ? <StopIcon /> : <MicIcon />}
                         </IconButton>
-                        <IconButton aria-label={"Send"} edge="end">
+                        <IconButton
+                            aria-label={"Send"}
+                            edge="end"
+                            onClick={() => onSend(textInput, setTextInput)}
+                            disabled={disabled}
+                        >
                             <SendIcon />
                         </IconButton>
                     </InputAdornment>

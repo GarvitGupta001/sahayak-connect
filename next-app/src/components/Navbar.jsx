@@ -26,7 +26,7 @@ const Navbar = () => {
             }}
             value={value}
             onChange={handleChange}
-        >   
+        >
             <BottomNavigationAction
                 component={Link}
                 href="/app/home"
