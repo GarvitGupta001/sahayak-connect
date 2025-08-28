@@ -27,7 +27,7 @@ import numpy as np
 A column(embeddings) which was MiniLM embedding of information
 """
 
-df = pd.read_pickle("ML-model\src\embeddings_new.pkl")
+df = pd.read_pickle(r"./ML-model\src/embeddings_final.pkl")
 
 import ast
 
@@ -85,14 +85,27 @@ null_embeddings_indices
 from flask import Flask,jsonify
 import json
 app = Flask(__name__)
-@app.route('/<string:text>')
-def application(text):
-    # data=json.loads(get_api_response(text))
-    # return jsonify(data)
-    sentence_emb = model.encode([text], convert_to_tensor=True)
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/submit', methods=['POST'])
+def submit_data():
+    data = request.get_json()   # Get JSON data from request body
+    prompt = data.get('prompt')  # Extract 'name' field
+    sentence_emb = model.encode([prompt], convert_to_tensor=True)
     data = get_schemes(sentence_emb, df)
     output = data[["scheme_name", "details", "benefits", "schemeCategory"]]
     return output.to_json(orient='records', force_ascii=False)
+
+# @app.route('/<string:text>')
+# def application(text):
+#     # data=json.loads(get_api_response(text))
+#     # return jsonify(data)
+#     sentence_emb = model.encode([text], convert_to_tensor=True)
+#     data = get_schemes(sentence_emb, df)
+#     output = data[["scheme_name", "details", "benefits", "schemeCategory"]]
+#     return output.to_json(orient='records', force_ascii=False)
 
 
 if __name__ == "__main__":
