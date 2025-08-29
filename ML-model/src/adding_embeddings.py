@@ -20,7 +20,6 @@ from transformers import BertTokenizer
 import nltk
 from nltk.corpus import stopwords
 import string
-import keras_nlp
 
 import kagglehub
 
