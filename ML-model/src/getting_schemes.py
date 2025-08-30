@@ -116,7 +116,6 @@ import os
 load_dotenv()
 
 # Access environment variables
-pt = os.getenv("MY_VARIABLE")
-
+pt = os.getenv("PORT")
 if __name__ == "__main__":
     app.run(debug=True,port=pt)
