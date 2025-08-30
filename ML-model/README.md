@@ -2,32 +2,6 @@
 
 This repository contains a machine learning model that provides government scheme recommendations based on user queries using sentence embeddings and cosine similarity.
 
-## 🚀 Quick Start - Railway Deployment
-
-### Prerequisites
-- GitHub repository with your ML-model folder
-- The `embeddings_final.pkl` file in the `src/` directory
-
-### Deploy to Railway (Recommended)
-
-1. **Go to [railway.app](https://railway.app)**
-2. **Sign in with GitHub**
-3. **Click "New Project"**
-4. **Select "Deploy from GitHub repo"**
-5. **Choose your repository**
-6. **Select the `ML-model` folder** (not the root)
-7. **Click "Deploy"**
-
-Railway will automatically:
-- Build your Docker image
-- Install dependencies
-- Start your service
-- Run health checks
-
-### Get Your API URL
-Once deployed, Railway will provide:
-- **Service URL**: `https://your-api-name.railway.app`
-- **Health Check**: `https://your-api-name.railway.app/health`
 
 ## 📊 API Endpoints
 
