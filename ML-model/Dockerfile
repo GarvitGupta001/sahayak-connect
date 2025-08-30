@@ -1,18 +1,16 @@
-# Use an official Python runtime as a parent image
-FROM python:3.12
+# Read the doc: https://huggingface.co/docs/hub/spaces-sdks-docker
+# you will also find guides on how best to write your Dockerfile
 
-# Set the working directory in the container
+FROM python:3.9
+
+RUN useradd -m -u 1000 user
+USER user
+ENV PATH="/home/user/.local/bin:$PATH"
+
 WORKDIR /app
 
-# Copy the local directory contents into the container at /app
-COPY . /app
+COPY --chown=user ./requirements.txt requirements.txt
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-# Install any needed packages
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Expose the port that your Flask app will run on. Hugging Face Spaces uses 7860.
-EXPOSE 7860
-
-# This is the crucial part. It tells Gunicorn to run your 'app' object
-# from the 'getting_schemes.py' file.
-CMD ["gunicorn", "--bind", "0.0.0.0:7860", "src.getting_schemes:app"]
+COPY --chown=user . /app
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
