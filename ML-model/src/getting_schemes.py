@@ -93,9 +93,6 @@ null_embeddings_indices
 
 app = Flask(__name__)
 
-
-app = Flask(__name__)
-
 @app.route('/submit', methods=['POST'])
 def submit_data():
     data = request.get_json()   # Get JSON data from request body
@@ -119,5 +116,4 @@ def submit_data():
 load_dotenv()
 
 if __name__ == "__main__":
-    port_= int(os.environ.get("PORT", 5000)) 
-    app.run(host="0.0.0.0",port=port_)
+    app.run(host="0.0.0.0",port=int(os.environ.get("PORT", 5000)))
