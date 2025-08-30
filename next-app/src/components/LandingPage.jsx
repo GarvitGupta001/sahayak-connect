@@ -22,9 +22,13 @@ export default function LandingPage() {
       <PhoneNavbar />
 
       {/* Hero Section (rewritten for full mobile visibility) */}
-      <section className="relative w-full min-h-[90vh] md:min-h-screen flex items-center pt-32 md:pt-40 pb-10">
+      <section className="relative w-full min-h-[70vh] md:min-h-screen flex items-center pt-32 md:pt-40 pb-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-white via-slate-50 to-blue-50" aria-hidden="true" />
-        <div className="absolute inset-y-0 right-0 w-[70%] md:w-1/2 bg-[url('/roboPhone.png')] bg-no-repeat bg-right-bottom bg-contain opacity-70 pointer-events-none" aria-hidden="true" />
+        {/* Full-bleed hero image (mobile: cover top, desktop: contained to right) */}
+        <div
+          className="absolute inset-0 bg-[url('/roboPhone.png')] bg-top bg-no-repeat md:bg-right-bottom bg-cover md:bg-contain opacity-70 pointer-events-none scale-[1.15] md:scale-100 origin-top "
+          aria-hidden="true"
+        />
         <div className="relative z-10 w-full max-w-7xl mx-auto px-5 md:px-12 flex flex-col md:flex-row gap-12">
           <div className="md:w-1/2 text-center md:text-left">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-5 leading-snug md:leading-tight">
