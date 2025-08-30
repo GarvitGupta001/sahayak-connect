@@ -3,7 +3,7 @@
 import React from "react";
 
 const Profile = () => {
-    return <div>Profile Page</div>;
+    return <div className="pt-4">Profile Page</div>;
 };
 
 export default Profile;
