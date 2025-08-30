@@ -8,3 +8,12 @@
   font-family: 'TAN-Tangkiwood';
   src: url('/TANTangkiwood-Display.otf') format('otf');
 }
+
+@keyframes fade-slide {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-slide {
+  animation: fade-slide 0.8s cubic-bezier(.4,.1,.2,1) forwards;
+}

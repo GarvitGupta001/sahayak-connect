@@ -127,50 +127,41 @@ const ChatInput = ({ onSend, disabled }) => {
         };
     }, [isRecording]);
 
-    return (
-        <FormControl sx={{ paddingX: "8px", paddingY: "12px", width: "100%" }}>
-            <OutlinedInput
-                sx={{
-                    borderRadius: "20px",
-                    fontSize: "16px",
-                    paddingX: "16px",
-                    paddingY: "4px",
-                }}
-                disabled={disabled}
-                type="text"
-                fullWidth={true}
-                placeholder="Ask your scheme..."
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                multiline={true}
-                minRows={1}
-                maxRows={4}
-                endAdornment={
-                    <InputAdornment
-                        position="end"
-                        sx={{ paddingRight: "8px", display: "flex" }}
-                    >
-                        <IconButton
-                            onClick={
-                                isRecording ? stopRecording : startRecording
-                            }
-                            disabled={disabled}
-                        >
-                            {isRecording ? <StopIcon /> : <MicIcon />}
-                        </IconButton>
-                        <IconButton
-                            aria-label={"Send"}
-                            edge="end"
-                            onClick={() => onSend(textInput, setTextInput)}
-                            disabled={disabled}
-                        >
-                            <SendIcon />
-                        </IconButton>
-                    </InputAdornment>
-                }
-            />
-        </FormControl>
-    );
+        return (
+            <div className="px-3 py-3">
+                <FormControl fullWidth>
+                    <OutlinedInput
+                        className="rounded-2xl bg-white/70 backdrop-blur border-slate-300 focus-within:border-slate-400 text-sm"
+                        disabled={disabled}
+                        placeholder="Ask about a scheme..."
+                        value={textInput}
+                        onChange={(e) => setTextInput(e.target.value)}
+                        multiline
+                        minRows={1}
+                        maxRows={5}
+                        endAdornment={
+                            <InputAdornment position="end" className="space-x-1">
+                                <IconButton
+                                    onClick={isRecording ? stopRecording : startRecording}
+                                    disabled={disabled}
+                                    size="small"
+                                >
+                                    {isRecording ? <StopIcon className="text-red-500"/> : <MicIcon className="text-slate-700"/>}
+                                </IconButton>
+                                <IconButton
+                                    aria-label="Send"
+                                    onClick={() => onSend(textInput, setTextInput)}
+                                    disabled={disabled || !textInput.trim()}
+                                    size="small"
+                                >
+                                    <SendIcon className="text-blue-600"/>
+                                </IconButton>
+                            </InputAdornment>
+                        }
+                    />
+                </FormControl>
+            </div>
+        );
 };
 
 export default ChatInput;

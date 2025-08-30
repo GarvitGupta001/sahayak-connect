@@ -1,10 +1,11 @@
 'use client'
 
+import GlassCard from './GlassCard';
 const ChatError = () => {
     return (
-        <div className="text-red-500">
-            <p>Something went wrong. Please try again later.</p>
-        </div>
+        <GlassCard className="max-w-[80%] bg-red-50/80 border-red-200 text-red-600 text-sm font-medium">
+            Something went wrong. Please try again.
+        </GlassCard>
     );
 };
 
