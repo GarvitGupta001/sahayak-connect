@@ -14,14 +14,27 @@ export async function GET(request) {
     try {
         await connectDB();
         const { searchParams } = new URL(request.url);
-        const id = searchParams.get("id");
+    const id = searchParams.get("id");
+    const idsParam = searchParams.get("ids"); // comma-separated list
         const searchText = searchParams.get("q") || "";
         const categoryFilter = searchParams.get("category") || "";
         const page = parseInt(searchParams.get("page") || "1", 10);
         const sortField = searchParams.get("sort") || "scheme_id";
         const sortOrder = (searchParams.get("order") || "asc").toLowerCase() === "desc" ? -1 : 1;
 
-        // If id param present, return single scheme (ignore other filters)
+        // Batch ids handling
+        if (idsParam) {
+            const ids = idsParam.split(',').map(s => s.trim()).filter(Boolean);
+            if (ids.length === 0) {
+                return NextResponse.json({ success: true, data: [] });
+            }
+            const schemes = await SchemeModel.find({ scheme_id: { $in: ids } }).lean();
+            // Maintain order of requested ids
+            const mapped = ids.map(idVal => schemes.find(s => s.scheme_id === idVal)).filter(Boolean);
+            return NextResponse.json({ success: true, data: mapped, count: mapped.length });
+        }
+
+        // If single id param present, return single scheme (ignore other filters)
         if (id) {
             const scheme = await SchemeModel.findOne({ scheme_id: id }).lean();
             if (!scheme) {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import ChatInput from "@/components/ui/ChatInput";
 import ChatLoading from "@/components/ui/ChatLoading";
 import ChatError from "@/components/ui/ChatError";
@@ -11,27 +11,35 @@ const Home = () => {
     const [chats, setChats] = useState([]);
     const [chatDisabled, setChatDisabled] = useState(false);
 
+    const ML_PROXY = "/api/ml/suggest"; // internal proxy endpoint
+
     const getMLResponse = async (input) => {
-        const response = await new Promise((resolve, reject) => {
-            setTimeout(() => {
-                const random = Math.random();
-                console.log(random);
-                if (random > 0.8) {
-                    resolve({
-                        success: false,
-                        message: "FAILED",
-                        data: null,
-                    });
-                    return;
-                }
-                resolve({
-                    success: true,
-                    message: "SUCCESS",
-                    data: "This is a sample response",
-                });
-            }, 1000);
-        });
-        return response;
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 15000);
+            const res = await fetch(ML_PROXY, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: input }),
+                signal: controller.signal
+            });
+            clearTimeout(timeout);
+            const json = await res.json();
+            if (!json.success) throw new Error(json.error || 'ML service error');
+            const array = Array.isArray(json.data) ? json.data : [];
+            const schemeIds = array.map(d => d.scheme_id).filter(Boolean);
+            if (schemeIds.length === 0) {
+                return { success: true, data: { schemes: [], rawIds: [], note: 'No scheme matches found.' } };
+            }
+            // Batch fetch using new ids param
+            const detailsRes = await fetch(`/api/schemes?ids=${encodeURIComponent(schemeIds.join(','))}`);
+            const detailsJson = await detailsRes.json();
+            const schemes = detailsJson.success ? detailsJson.data : [];
+            return { success: true, data: { schemes, rawIds: schemeIds } };
+        } catch (e) {
+            console.error(e);
+            return { success: false, error: e.message === 'AbortError' ? 'Request timed out' : e.message };
+        }
     };
 
     const onSend = async (input, setInput) => {
@@ -44,9 +52,8 @@ const Home = () => {
         console.log(chat);
         setChats((chats) => [...chats, chat]);
         setChatDisabled(true);
-        const response = await getMLResponse(input);
-        console.log(response);
-        if (!response.success) {
+    const response = await getMLResponse(input);
+    if (!response.success) {
             setChats((currentChats) =>
                 currentChats.map((chat, index) => {
                     if (index === currentChats.length - 1) {
@@ -67,7 +74,7 @@ const Home = () => {
                     return {
                         ...chat,
                         status: RESPONSE_STATUS.FETCHED,
-                        bot: response.data,
+            bot: response.data,
                     };
                 }
                 return chat;
