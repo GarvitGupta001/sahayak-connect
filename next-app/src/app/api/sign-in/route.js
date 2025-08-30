@@ -49,6 +49,7 @@ export async function POST(request) {
                     message: "USER_CREATED",
                     token: token,
                     user: {
+                        _id: user._id,
                         phone: user.phone,
                         profileComplete: user.profileComplete,
                     },
