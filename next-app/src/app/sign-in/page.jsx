@@ -16,7 +16,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useUserContext } from "@/hooks/useUserContext";
 import Loader from "@/components/Loader";
-import Image from 'next/image';
 import GlassCard from '@/components/ui/GlassCard';
 
 export default function SignIn() {
@@ -89,7 +88,7 @@ export default function SignIn() {
             ) : (
                 <Box className="min-h-screen my-6 mx-auto flex flex-col items-center gap-10 max-w-md px-4">
                     <div className="flex flex-col items-center gap-3 mt-4">
-                        <Image src="/sahaayaklogo%20(1).png" alt="Sahayak logo" width={160} height={160} priority className="w-40 h-auto" />
+                    {/* <Image src="/sahaayaklogo%20(1).png" alt="Sahayak logo" width={160} height={160} priority className="w-40 h-auto" /> */}
                         <h1 className="text-4xl md:text-5xl font-['TAN-Tangkiwood'] font-bold text-center leading-none">
                             Sahayak<br/>Connect
                         </h1>
