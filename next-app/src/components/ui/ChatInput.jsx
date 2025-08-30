@@ -1,11 +1,16 @@
 "use client";
 
-import { FormControl, OutlinedInput } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import MicIcon from "@mui/icons-material/Mic";
-import SendIcon from "@mui/icons-material/Send";
-import StopIcon from "@mui/icons-material/Stop";
+import {
+    FormControl,
+    OutlinedInput,
+    IconButton,
+    InputAdornment,
+} from "@mui/material";
+import {
+    Mic as MicIcon,
+    Send as SendIcon,
+    Stop as StopIcon,
+} from "@mui/icons-material";
 import { useState, useRef, useEffect } from "react";
 import { useUserContext } from "@/hooks/useUserContext";
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";

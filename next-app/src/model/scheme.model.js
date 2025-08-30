@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 
 const schemeSchema = new mongoose.Schema({
+    scheme_id: {
+        type: String,
+        required: true,
+        index: true,
+        unique: true,
+    },
     scheme_name: {
         type: String,
         required: true,
@@ -15,18 +21,19 @@ const schemeSchema = new mongoose.Schema({
     },
     documents: {
         type: String,
-        required: true
+        required: true,
     },
     schemeCategory: {
-        type: String,
-        required: true
+        type: [String],
+        required: true,
     },
     tags: {
         type: [String],
-        required: true
-    }
+        required: true,
+    },
 });
 
-const SchemeModel = mongoose.models.schemes || mongoose.model("schemes", schemeSchema);
+const SchemeModel =
+    mongoose.models.schemes || mongoose.model("schemes", schemeSchema);
 
 export default SchemeModel;

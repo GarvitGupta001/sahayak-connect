@@ -1,33 +1,59 @@
-import { NextResponse } from "next/server";
 import connectDB from "@/lib/dbConnect";
+import { NextResponse } from "next/server";
 import SchemeModel from "@/model/scheme.model";
-
-// Helper function to escape special characters for regex
-function escapeRegex(string) {
-    return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
-}
+// Ensure MongoDB connection
 
 export async function GET(request) {
     try {
-        await connectDB();
+        connectDB();
+        const { searchParams } = new URL(request.url);
+        const searchText = searchParams.get("q") || "";
+        const categoryFilter = searchParams.get("category") || "";
+        const page = parseInt(searchParams.get("page") || "1");
 
-        // Use optional chaining to safely access searchParams
-        const search = request.nextUrl.searchParams.get("search");
+        // Build case-insensitive regex for text search
+        const searchRegex = new RegExp(searchText, "i");
 
-        let query = {};
+        // Construct filter query
+        const filter = {};
 
-        if (search) {
-            const sanitizedSearch = escapeRegex(search);
-            query = { scheme_name: { $regex: sanitizedSearch, $options: "i" } };
+        // Add category filter if specified
+        if (categoryFilter) {
+            filter.schemeCategory = categoryFilter;
         }
 
-        const schemes = await SchemeModel.find(query);
+        // Add text search across multiple fields if search text provided
+        if (searchText) {
+            filter.$or = [
+                { scheme_name: searchRegex },
+                { details: searchRegex },
+                { benefits: searchRegex },
+                { documents: searchRegex },
+                { tags: { $in: [searchRegex] } },
+            ];
+        }
 
-        return NextResponse.json({ success: true, schemes });
+        const totalSchemes = await SchemeModel.countDocuments(filter);
+
+        const schemes = await SchemeModel.find(filter)
+            .skip((page - 1) * 10)
+            .limit(10)
+            .exec();
+
+        return NextResponse.json({
+            success: true,
+            message: "SUCCESS",
+            count: totalSchemes,
+            data: schemes,
+            currentPage: page,
+            totalPages: Math.ceil(totalSchemes / 10),
+            isFirstPage: page === 1,
+            isLastPage: page === Math.ceil(totalSchemes / 10),
+        });
     } catch (error) {
-        console.error("Error fetching schemes:", error);
+        console.error("Search API Error:", error);
         return NextResponse.json(
-            { success: false, message: "Failed to fetch schemes." },
+            { success: false, error: error.message },
             { status: 500 }
         );
     }
