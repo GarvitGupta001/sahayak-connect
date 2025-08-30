@@ -27,7 +27,7 @@ import numpy as np
 A column(embeddings) which was MiniLM embedding of information
 """
 
-df = pd.read_pickle(r"./ML-model\src/embeddings_final.pkl")
+df = pd.read_pickle(r"./ML-model/src/embeddings_final.pkl")
 
 import ast
 
@@ -69,9 +69,9 @@ output
 null_embeddings_indices = df[df['embeddings'].isnull()].index.tolist()
 
 null_embeddings_indices
-# def get_api_response(text):  
+# def get_api_response(text):
 #   import google.generativeai as genai
-#   genai.configure(api_key="AIzaSyBiGcdP5rHCA6NWiDTrsTSv9ELnYvCznFA")
+#   genai.configure(api_key)
 #   model = genai.GenerativeModel("gemini-2.5-flash")
 #   response=model.generate_content(f"""
 #   this dataset have just 5 rows, display the schemes, followed by corresponding details, benefits,and documents required
@@ -109,7 +109,13 @@ def submit_data():
 #     data = get_schemes(sentence_emb, df)
 #     output = data[["scheme_name", "details", "benefits", "schemeCategory"]]
 #     return output.to_json(orient='records', force_ascii=False)
+from dotenv import load_dotenv
+import os
 
+# Load environment variables from .env file
+load_dotenv()
 
+# Access environment variables
+pt = os.getenv("PORT")
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,port=int(pt))
