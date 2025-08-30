@@ -27,7 +27,7 @@ import numpy as np
 A column(embeddings) which was MiniLM embedding of information
 """
 
-df = pd.read_pickle(r"./embeddings_final.pkl")
+df = pd.read_pickle(r"embeddings_final.pkl")
 
 import ast
 
