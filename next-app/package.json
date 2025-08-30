@@ -21,9 +21,10 @@
     "jsonwebtoken": "^9.0.2",
     "key-mirror": "^1.0.1",
     "mongoose": "^8.16.4",
-    "next": "15.4.3",
+    "next": "^15.5.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "remixicon": "^4.6.0",
     "use-debounce": "^10.0.5",
     "zod": "^4.0.10"
   },

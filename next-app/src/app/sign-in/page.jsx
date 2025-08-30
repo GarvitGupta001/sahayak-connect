@@ -16,6 +16,8 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useUserContext } from "@/hooks/useUserContext";
 import Loader from "@/components/Loader";
+import Image from 'next/image';
+import GlassCard from '@/components/ui/GlassCard';
 
 export default function SignIn() {
     const router = useRouter();
@@ -85,23 +87,15 @@ export default function SignIn() {
             {pageLoading ? (
                 <Loader />
             ) : (
-                <Box className="h-screen my-4 mx-4 flex flex-col justify-start gap-25">
-                    <div className="flex justify-center items-center gap-3 mt-25">
-                        <img
-                            src="/logo.png"
-                            alt="logo.png"
-                            className="w-[30%]"
-                        />
-                        <h1 className="text-5xl font-['TAN-Tangkiwood'] font-bold">
-                            Sahayak
-                            <br /> Connect
+                <Box className="min-h-screen my-6 mx-auto flex flex-col items-center gap-10 max-w-md px-4">
+                    <div className="flex flex-col items-center gap-3 mt-4">
+                        <Image src="/sahaayaklogo%20(1).png" alt="Sahayak logo" width={160} height={160} priority className="w-40 h-auto" />
+                        <h1 className="text-4xl md:text-5xl font-['TAN-Tangkiwood'] font-bold text-center leading-none">
+                            Sahayak<br/>Connect
                         </h1>
                     </div>
-                    <div className="">
-                        <form
-                            onSubmit={handleSubmit}
-                            className="flex flex-col gap-5"
-                        >
+                    <GlassCard className="w-full">
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                             <FormControl
                                 variant="outlined"
                                 error={!!errorMessage.phone}
@@ -166,15 +160,23 @@ export default function SignIn() {
                                     {errorMessage.password}
                                 </FormHelperText>
                             </FormControl>
-                            <Button
-                                type="submit"
-                                loading={loading}
-                                variant="contained"
-                            >
-                                Confirm
-                            </Button>
+                                                        <Button
+                                                            type="submit"
+                                                            loading={loading}
+                                                            variant="contained"
+                                                            sx={{
+                                                                textTransform: 'none',
+                                                                borderRadius: '9999px',
+                                                                paddingY: '10px',
+                                                                fontWeight: 600,
+                                                                background: 'linear-gradient(to right,#0f172a,#1e3a8a)',
+                                                            }}
+                                                            fullWidth
+                                                        >
+                                                            Confirm
+                                                        </Button>
                         </form>
-                    </div>
+                                        </GlassCard>
                 </Box>
             )}
         </>

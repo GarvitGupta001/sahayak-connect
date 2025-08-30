@@ -80,23 +80,25 @@ const Home = () => {
     //     console.log(chats);
     // }, [chats]);
 
-    return (
-        <>
-            <div className="flex flex-col justify-end h-[100%] overflow-y-scroll">
-                <div className="flex flex-col overflow-y-scroll">
+        return (
+            <div className="flex flex-col h-full rounded-xl bg-white/70 backdrop-blur border border-slate-200 shadow-sm overflow-hidden">
+                <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scroll-smooth">
+                    {chats.length === 0 && (
+                        <div className="text-center text-slate-500 text-sm font-medium">
+                            Ask about a government scheme in your language to get started.
+                        </div>
+                    )}
                     {chats.map((chat, index) => (
-                        <div key={index} className="mb-4">
-                            <div className="p-3 rounded-lg bg-blue-500 text-white self-end max-w-lg ml-auto">
-                                <p>{chat.user}</p>
+                        <div key={index} className="space-y-3 animate-fade-slide" style={{animationDelay: `${index*80}ms`}}>
+                            <div className="ml-auto max-w-[80%] rounded-2xl bg-gradient-to-r from-slate-900 to-blue-900 text-white px-4 py-3 shadow">
+                                <p className="whitespace-pre-wrap text-sm leading-relaxed">{chat.user}</p>
                             </div>
                             {(() => {
                                 switch (chat.status) {
                                     case RESPONSE_STATUS.FETCHING:
                                         return <ChatLoading />;
                                     case RESPONSE_STATUS.FETCHED:
-                                        return (
-                                            <ChatSuccess message={chat.bot} />
-                                        );
+                                        return <ChatSuccess message={chat.bot} />;
                                     case RESPONSE_STATUS.FAILED_FETCH:
                                         return <ChatError />;
                                     default:
@@ -106,10 +108,11 @@ const Home = () => {
                         </div>
                     ))}
                 </div>
-                <ChatInput onSend={onSend} disabled={chatDisabled} />
+                <div className="border-t border-slate-200 bg-white/80">
+                    <ChatInput onSend={onSend} disabled={chatDisabled} />
+                </div>
             </div>
-        </>
-    );
+        );
 };
 
 export default Home;

@@ -1,10 +1,11 @@
 "use client";
+import GlassCard from './GlassCard';
 
 const ChatSuccess = ({ message }) => {
     return (
-        <div>
-            <p>{message}</p>
-        </div>
+        <GlassCard className="max-w-[80%] text-slate-800 text-sm leading-relaxed">
+            <p className="whitespace-pre-wrap">{message}</p>
+        </GlassCard>
     );
 };
 
