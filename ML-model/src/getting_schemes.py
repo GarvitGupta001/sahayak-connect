@@ -21,13 +21,21 @@ from nltk.corpus import stopwords
 import string
 # import keras_nlp
 import numpy as np
+from dotenv import load_dotenv
+import os
 
 """**IMPORTING PKL FILE OF EDITED CSV**
 
 A column(embeddings) which was MiniLM embedding of information
 """
+file_path = os.path.join(os.path.dirname(__file__),'embeddings_final.pkl')
 
-df = pd.read_pickle(r"embeddings_final.pkl")
+# Ensure the file exists before attempting to load
+if os.path.exists(file_path):
+    df = pd.read_pickle(file_path)
+else:
+    raise FileNotFoundError(f"File not found at {file_path}")
+# df = pd.read_pickle(r"./ML-model/src/embeddings_final.pkl")
 
 import ast
 
@@ -109,13 +117,15 @@ def submit_data():
 #     data = get_schemes(sentence_emb, df)
 #     output = data[["scheme_name", "details", "benefits", "schemeCategory"]]
 #     return output.to_json(orient='records', force_ascii=False)
-from dotenv import load_dotenv
-import os
+
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Access environment variables
-pt = os.getenv("PORT")
+pt = int(os.getenv("PORT"))
+print(pt)
+print(type(pt))
+
 if __name__ == "__main__":
-    app.run(debug=True,port=int(pt))
+    app.run(debug=True,host="0.0.0.0",port=int(pt))
