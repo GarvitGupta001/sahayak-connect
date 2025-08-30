@@ -76,9 +76,9 @@ const Home = () => {
         setChatDisabled(false);
     };
 
-    useEffect(() => {
-        console.log(chats);
-    }, [chats]);
+    // useEffect(() => {
+    //     console.log(chats);
+    // }, [chats]);
 
     return (
         <>

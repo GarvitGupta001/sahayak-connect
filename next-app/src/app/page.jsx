@@ -1,38 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Loader from "@/components/Loader";
 
 export default function Home() {
-  const [activeDot, setActiveDot] = useState(0);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveDot((prev) => (prev + 1) % 4);
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
+    useEffect(() => {
+        if (localStorage.token) {
+            window.location.href = "/app/home";
+        } else {
+            window.location.href = "/sign-in";
+        }
+        setLoading(false);
+    }, []);
 
-  return (
-    <div className="h-screen w-screen flex justify-between px-10 items-center bg-black text-white">
-      <div className="w-[50%]">
-        <h1 className="text-7xl">Sahayak Connect</h1>
-        <p className="text-4xl">
-          Under Development
-          {activeDot > 0 ? "." : ""}
-          {activeDot > 1 ? "." : ""}
-          {activeDot > 2 ? "." : ""}
-        </p>
-      </div>
-      <div className="flex justify-center w-[50%]">
-        <video
-          src="/AI_orb.webm"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="h-96"
-        ></video>
-      </div>
-    </div>
-  );
+    return <>{loading ? <Loader /> : null}</>;
 }
