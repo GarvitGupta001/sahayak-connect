@@ -112,12 +112,4 @@ def submit_data():
 
 
 if __name__ == "__main__":
-    app.run(debug=True,host="0.0.0.0", port=7860)
-
-import gradio as gr
-
-def greet(name):
-    return "Hello " + name + "!!"
-
-demo = gr.Interface(fn=greet, inputs="text", outputs="text")
-demo.launch()
+    app.run(debug=True)
