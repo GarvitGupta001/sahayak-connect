@@ -122,10 +122,6 @@ def submit_data():
 # Load environment variables from .env file
 load_dotenv()
 
-# Access environment variables
-pt = int(os.getenv("PORT"))
-print(pt)
-print(type(pt))
-
 if __name__ == "__main__":
-    app.run(debug=True,host="0.0.0.0",port=int(pt))
+    port_= int(os.environ.get("PORT", 5000)) 
+    app.run(host="0.0.0.0",port=port_)
