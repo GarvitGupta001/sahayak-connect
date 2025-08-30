@@ -116,5 +116,5 @@ def submit_data():
 load_dotenv()
 
 if __name__ == "__main__":
-    port_= int(os.environ.get("PORT", 5000)) 
-    app.run(host="0.0.0.0",port=port_)
+    port_= int(os.environ.get('PORT', 5000)) 
+    app.run(host='0.0.0.0',port=port_)
