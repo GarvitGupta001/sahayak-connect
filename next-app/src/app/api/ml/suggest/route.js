@@ -13,16 +13,12 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
         console.log(ML_ENDPOINT);
         const res = await fetch(ML_ENDPOINT, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ prompt }),
-            signal: controller.signal,
         });
-        clearTimeout(timeout);
         if (!res.ok) {
             return NextResponse.json(
                 { success: false, error: "Upstream ML error" },
@@ -30,13 +26,12 @@ export async function POST(request) {
             );
         }
         const data = await res.json();
-        return NextResponse.json({ success: true, data });
+        return NextResponse.json({ ...data });
     } catch (e) {
-        const aborted = e.name === "AbortError";
         return NextResponse.json(
             {
                 success: false,
-                error: aborted ? "ML request timed out" : e.message,
+                error: e.message,
             },
             { status: 500 }
         );

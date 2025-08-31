@@ -15,30 +15,42 @@ const Home = () => {
 
     const getMLResponse = async (input) => {
         try {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 15000);
             const res = await fetch(ML_PROXY, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ prompt: input }),
-                signal: controller.signal
             });
-            clearTimeout(timeout);
             const json = await res.json();
-            if (!json.success) throw new Error(json.error || 'ML service error');
+            if (!json.success)
+                throw new Error(json.error || "ML service error");
             const array = Array.isArray(json.data) ? json.data : [];
-            const schemeIds = array.map(d => d.scheme_id).filter(Boolean);
+            const schemeIds = array.map((d) => d.scheme_id).filter(Boolean);
             if (schemeIds.length === 0) {
-                return { success: true, data: { schemes: [], rawIds: [], note: 'No scheme matches found.' } };
+                return {
+                    success: true,
+                    data: {
+                        schemes: [],
+                        rawIds: [],
+                        note: "No scheme matches found.",
+                    },
+                };
             }
             // Batch fetch using new ids param
-            const detailsRes = await fetch(`/api/schemes?ids=${encodeURIComponent(schemeIds.join(','))}`);
+            const detailsRes = await fetch(
+                `/api/schemes?ids=${encodeURIComponent(schemeIds.join(","))}`
+            );
             const detailsJson = await detailsRes.json();
             const schemes = detailsJson.success ? detailsJson.data : [];
             return { success: true, data: { schemes, rawIds: schemeIds } };
         } catch (e) {
             console.error(e);
-            return { success: false, error: e.message === 'AbortError' ? 'Request timed out' : e.message };
+            return {
+                success: false,
+                error:
+                    e.message === "AbortError"
+                        ? "Request timed out"
+                        : e.message,
+            };
         }
     };
 
@@ -52,8 +64,8 @@ const Home = () => {
         console.log(chat);
         setChats((chats) => [...chats, chat]);
         setChatDisabled(true);
-    const response = await getMLResponse(input);
-    if (!response.success) {
+        const response = await getMLResponse(input);
+        if (!response.success) {
             setChats((currentChats) =>
                 currentChats.map((chat, index) => {
                     if (index === currentChats.length - 1) {
@@ -74,7 +86,7 @@ const Home = () => {
                     return {
                         ...chat,
                         status: RESPONSE_STATUS.FETCHED,
-            bot: response.data,
+                        bot: response.data,
                     };
                 }
                 return chat;
@@ -87,39 +99,46 @@ const Home = () => {
     //     console.log(chats);
     // }, [chats]);
 
-        return (
-            <div className="flex flex-col h-full rounded-xl bg-white/70 backdrop-blur border border-slate-200 shadow-sm overflow-hidden">
-                <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scroll-smooth">
-                    {chats.length === 0 && (
-                        <div className="text-center text-slate-500 text-sm font-medium">
-                            Ask about a government scheme in your language to get started.
+    return (
+        <div className="flex flex-col h-full rounded-xl bg-white/70 backdrop-blur border border-slate-200 shadow-sm overflow-hidden">
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scroll-smooth">
+                {chats.length === 0 && (
+                    <div className="text-center text-slate-500 text-sm font-medium">
+                        Ask about a government scheme in your language to get
+                        started.
+                    </div>
+                )}
+                {chats.map((chat, index) => (
+                    <div
+                        key={index}
+                        className="space-y-3 animate-fade-slide"
+                        style={{ animationDelay: `${index * 80}ms` }}
+                    >
+                        <div className="ml-auto max-w-[80%] rounded-2xl bg-gradient-to-r from-slate-900 to-blue-900 text-white px-4 py-3 shadow">
+                            <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                                {chat.user}
+                            </p>
                         </div>
-                    )}
-                    {chats.map((chat, index) => (
-                        <div key={index} className="space-y-3 animate-fade-slide" style={{animationDelay: `${index*80}ms`}}>
-                            <div className="ml-auto max-w-[80%] rounded-2xl bg-gradient-to-r from-slate-900 to-blue-900 text-white px-4 py-3 shadow">
-                                <p className="whitespace-pre-wrap text-sm leading-relaxed">{chat.user}</p>
-                            </div>
-                            {(() => {
-                                switch (chat.status) {
-                                    case RESPONSE_STATUS.FETCHING:
-                                        return <ChatLoading />;
-                                    case RESPONSE_STATUS.FETCHED:
-                                        return <ChatSuccess message={chat.bot} />;
-                                    case RESPONSE_STATUS.FAILED_FETCH:
-                                        return <ChatError />;
-                                    default:
-                                        return null;
-                                }
-                            })()}
-                        </div>
-                    ))}
-                </div>
-                <div className="border-t border-slate-200 bg-white/80">
-                    <ChatInput onSend={onSend} disabled={chatDisabled} />
-                </div>
+                        {(() => {
+                            switch (chat.status) {
+                                case RESPONSE_STATUS.FETCHING:
+                                    return <ChatLoading />;
+                                case RESPONSE_STATUS.FETCHED:
+                                    return <ChatSuccess message={chat.bot} />;
+                                case RESPONSE_STATUS.FAILED_FETCH:
+                                    return <ChatError />;
+                                default:
+                                    return null;
+                            }
+                        })()}
+                    </div>
+                ))}
             </div>
-        );
+            <div className="border-t border-slate-200 bg-white/80">
+                <ChatInput onSend={onSend} disabled={chatDisabled} />
+            </div>
+        </div>
+    );
 };
 
 export default Home;

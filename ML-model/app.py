@@ -10,12 +10,15 @@ app = Flask(__name__)
 
 @app.route('/submit', methods=['POST'])
 def submit_data():
-    data = request.get_json()
-    prompt = data.get('prompt')
-    data = get_schemes(prompt)
-    output = data[["scheme_id", "scheme_name", "schemeCategory"]]
-    output = output.to_dict(orient='records')
-    return jsonify({"success": True, "message": "SUCCESS", "data": output}), 200
+    try:
+        data = request.get_json()
+        prompt = data.get('prompt')
+        data = get_schemes(prompt)
+        output = data[["scheme_id", "scheme_name", "schemeCategory"]]
+        output = output.to_dict(orient='records')
+        return jsonify({"success": True, "message": "SUCCESS", "data": output}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=port)
