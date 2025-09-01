@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
     FormControl,
     TextField,
@@ -13,12 +13,9 @@ import {
     Search as SearchIcon,
     FilterAlt as FilterAltIcon,
 } from "@mui/icons-material";
+import Link from "next/link";
 
 const Search = () => {
-    const searchRef = useRef(null);
-    const filterRef = useRef(null);
-    const resultsRef = useRef(null);
-
     const options = [
         "Sports & Culture",
         "Utility & Sanitation",
@@ -48,7 +45,11 @@ const Search = () => {
     const [error, setError] = useState(null);
     const [hasMore, setHasMore] = useState(true);
 
-    const fetchSchemes = async ({ reset = false, q = search, nextPage = reset ? 1 : page }) => {
+    const fetchSchemes = async ({
+        reset = false,
+        q = search,
+        nextPage = reset ? 1 : page,
+    }) => {
         try {
             setLoading(true);
             setError(null);
@@ -56,7 +57,7 @@ const Search = () => {
             if (q) params.set("q", q);
             const res = await fetch(`/api/schemes?${params.toString()}`);
             const data = await res.json();
-            if (!data.success) throw new Error(data.error || 'Failed');
+            if (!data.success) throw new Error(data.error || "Failed");
             setSchemes((prev) => (reset ? data.data : [...prev, ...data.data]));
             setPage(nextPage);
             setHasMore(!data.isLastPage);
@@ -78,8 +79,8 @@ const Search = () => {
     }, []);
 
     return (
-    <div className="h-[100%] pt-2 flex flex-col gap-4">
-            <div ref={searchRef}>
+        <div className="h-[100%] pt-2 flex flex-col gap-4">
+            <div>
                 <FormControl
                     sx={{
                         width: "100%",
@@ -134,25 +135,43 @@ const Search = () => {
                     />
                 </FormControl>
             </div>
-            <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-3">
+            <div className="flex flex-col overflow-y-auto px-3 pb-4 space-y-3">
                 {schemes.map((s) => (
-                    <div key={s.scheme_id} className="p-3 rounded-lg border border-slate-200 bg-white/70 backdrop-blur-sm shadow-sm">
-                        <div className="text-xs font-mono text-slate-500">{s.scheme_id}</div>
-                        <div className="font-semibold text-sm text-slate-800">{s.scheme_name}</div>
-                    </div>
+                    <Link key={s.scheme_id} href={`/scheme/${s.scheme_id}`}>
+                        <div
+                            key={s.scheme_id}
+                            className="p-3 rounded-lg border border-slate-200 bg-white/70 backdrop-blur-sm shadow-sm"
+                        >
+                            <div className="font-semibold text-sm text-slate-800">
+                                {s.scheme_name}
+                            </div>
+                        </div>
+                    </Link>
                 ))}
-                {loading && <div className="text-center text-xs text-slate-500">Loading...</div>}
-                {error && <div className="text-center text-xs text-red-600">{error}</div>}
+                {loading && (
+                    <div className="text-center text-xs text-slate-500">
+                        Loading...
+                    </div>
+                )}
+                {error && (
+                    <div className="text-center text-xs text-red-600">
+                        {error}
+                    </div>
+                )}
                 {!loading && hasMore && (
                     <button
-                        onClick={() => fetchSchemes({ reset: false, nextPage: page + 1 })}
+                        onClick={() =>
+                            fetchSchemes({ reset: false, nextPage: page + 1 })
+                        }
                         className="w-full py-2 text-sm font-medium rounded-md bg-slate-900 text-white hover:bg-slate-800 transition"
                     >
                         Load More
                     </button>
                 )}
                 {!loading && !hasMore && schemes.length > 0 && (
-                    <div className="text-center text-xs text-slate-400">End of results</div>
+                    <div className="text-center text-xs text-slate-400">
+                        End of results
+                    </div>
                 )}
             </div>
         </div>

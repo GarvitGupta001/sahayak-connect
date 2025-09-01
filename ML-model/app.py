@@ -14,7 +14,7 @@ def submit_data():
         data = request.get_json()
         prompt = data.get('prompt')
         data = get_schemes(prompt)
-        output = data[["scheme_id", "scheme_name", "schemeCategory"]]
+        output = data[["scheme_id", "scheme_name", "details"]]
         output = output.to_dict(orient='records')
         return jsonify({"success": True, "message": "SUCCESS", "data": output}), 200
     except Exception as e:

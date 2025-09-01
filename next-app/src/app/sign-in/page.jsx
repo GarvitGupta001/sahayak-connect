@@ -38,7 +38,6 @@ export default function SignIn() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        console.log(process.env.BASE_URL);
         try {
             const response = await axios.post(`/api/sign-in`, {
                 phone: phone,
