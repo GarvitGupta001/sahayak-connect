@@ -4,13 +4,11 @@ Integrates the enhanced form filler with improved error handling and validation
 """
 
 from flask import Flask, request, render_template, jsonify, send_file
-import json
 from werkzeug.utils import secure_filename
 import os
 import re
 import logging
-from datetime import datetime
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict
 import traceback
 
 # Import enhanced form filler

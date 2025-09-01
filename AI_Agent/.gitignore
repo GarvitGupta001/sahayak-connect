@@ -1,2 +1,5 @@
 .env
 path
+venv
+*.log
+enhanced_filled_form.pdf

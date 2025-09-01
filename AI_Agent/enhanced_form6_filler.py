@@ -9,7 +9,6 @@ import re
 from PyPDF2 import PdfReader, PdfWriter
 from datetime import datetime, date
 import io
-import json
 from typing import Dict, List, Optional, Tuple, Any
 
 # Configure logging
