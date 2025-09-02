@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Upload Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .file-input {
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 8px;
+        }
+        .preview-image {
+            max-width: 300px;
+            margin-top: 10px;
+            display: none;
+        }
+        .submit-btn {
+            background-color: #003950;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .submit-btn:hover {
+            background-color: #005b55;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            border: 1px solid #d6e9c6;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            border: 1px solid #ebccd1;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <h1>Document Upload</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="aadhaar">Aadhaar Card Image:</label>
+            <input type="file" id="aadhaar" name="aadhaar" accept="image/*" required class="file-input" onchange="previewImage(this, 'aadhaarPreview')">
+            <img id="aadhaarPreview" class="preview-image" alt="Aadhaar Preview">
+        </div>
+        
+        <div class="form-group">
+            <label for="voter">Voter ID Image:</label>
+            <input type="file" id="voter" name="voter" accept="image/*" required class="file-input" onchange="previewImage(this, 'voterPreview')">
+            <img id="voterPreview" class="preview-image" alt="Voter ID Preview">
+        </div>
+        
+        <button type="submit" class="submit-btn">Process Documents</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <!-- Add progress bar -->
+    <div id="progressContainer" style="display: none; margin: 20px 0;">
+        <div style="width: 100%; background-color: #f0f0f0; border-radius: 4px; padding: 2px;">
+            <div id="progressBar" style="width: 0%; height: 20px; background-color: #4CAF50; border-radius: 4px; transition: width 0.3s;"></div>
+        </div>
+        <p id="progressMessage" style="margin-top: 10px; text-align: center;"></p>
+    </div>
+    
+    <iframe id="pdfViewer" style="display: none; width: 100%; height: 800px; border: none;"></iframe>
+
+    <script>
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Add function to check processing status
+        async function checkStatus() {
+            try {
+                const response = await fetch('/status');
+                const data = await response.json();
+                
+                const progressContainer = document.getElementById('progressContainer');
+                const progressBar = document.getElementById('progressBar');
+                const progressMessage = document.getElementById('progressMessage');
+                
+                progressContainer.style.display = 'block';
+                progressBar.style.width = `${data.progress}%`;
+                progressMessage.textContent = data.message;
+                
+                if (data.status === 'processing') {
+                    setTimeout(checkStatus, 1000);
+                } else if (data.status === 'error') {
+                    progressContainer.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const resultDiv = document.getElementById('result');
+            const pdfViewer = document.getElementById('pdfViewer');
+            const progressContainer = document.getElementById('progressContainer');
+            
+            try {
+                progressContainer.style.display = 'block';
+                checkStatus(); // Start checking status
+                
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'success';
+                    resultDiv.textContent = data.message;
+                    
+                    // Display the PDF
+                    if (data.pdfUrl) {
+                        pdfViewer.src = data.pdfUrl;
+                        pdfViewer.style.display = 'block';
+                    }
+                } else {
+                    resultDiv.className = 'error';
+                    resultDiv.textContent = data.error || 'An error occurred';
+                    pdfViewer.style.display = 'none';
+                }
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = 'An error occurred while processing the request';
+                pdfViewer.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

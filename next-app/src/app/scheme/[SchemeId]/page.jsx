@@ -115,6 +115,12 @@ export default function SchemePage() {
                     ))}
                 </div>
             </div>
+            <div className="flex justify-center items-center gap-5">
+            <button
+                    className="bg-[#168996] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#46868e] transition-colors mb-4"> Download Form </button>
+            <button
+                    className="bg-[#003158] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#46868e] transition-colors mb-4"> Fill Form with AI</button>
+            </div>
         </div>
     );
 }

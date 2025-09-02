@@ -1,169 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Upload Form</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .file-input {
-            margin-bottom: 10px;
-            width: 100%;
-            padding: 8px;
-        }
-        .preview-image {
-            max-width: 300px;
-            margin-top: 10px;
-            display: none;
-        }
-        .submit-btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .submit-btn:hover {
-            background-color: #45a049;
-        }
-        #result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 4px;
-        }
-        .success {
-            background-color: #dff0d8;
-            border: 1px solid #d6e9c6;
-            color: #3c763d;
-        }
-        .error {
-            background-color: #f2dede;
-            border: 1px solid #ebccd1;
-            color: #a94442;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Agent Form Assistant</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 5px;
+      color: #003950;
+    }
+
+    p.subtitle {
+      text-align: center;
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .ai-banner {
+      background: #e0f7f9;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 1rem;
+      margin-bottom: 25px;
+      color: #034f57;
+      font-weight: 500;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+      font-size: 0.95rem;
+    }
+
+    .file-input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fafafa;
+    }
+
+    .preview-image {
+      margin-top: 10px;
+      max-width: 100%;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      display: none;
+    }
+
+    .submit-btn {
+      background: #002b3c;
+      color: #fff;
+      padding: 14px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+
+    .submit-btn:hover {
+      background: #427e9f;
+    }
+
+    #result {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    .success {
+      background: #dff0d8;
+      color: #3c763d;
+      border: 1px solid #d6e9c6;
+      display: block;
+    }
+
+    .error {
+      background: #f2dede;
+      color: #a94442;
+      border: 1px solid #ebccd1;
+      display: block;
+    }
+
+    #progressContainer {
+      margin: 20px 0;
+      display: none;
+    }
+
+    #progressContainer div {
+      background: #f0f0f0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    #progressBar {
+      background: #4caf50;
+      height: 16px;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    #progressMessage {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    iframe {
+      display: none;
+      width: 100%;
+      height: 400px;
+      border: none;
+      margin-top: 15px;
+      border-radius: 6px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Document Upload</h1>
-    <form id="uploadForm" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="aadhaar">Aadhaar Card Image:</label>
-            <input type="file" id="aadhaar" name="aadhaar" accept="image/*" required class="file-input" onchange="previewImage(this, 'aadhaarPreview')">
-            <img id="aadhaarPreview" class="preview-image" alt="Aadhaar Preview">
-        </div>
-        
-        <div class="form-group">
-            <label for="voter">Voter ID Image:</label>
-            <input type="file" id="voter" name="voter" accept="image/*" required class="file-input" onchange="previewImage(this, 'voterPreview')">
-            <img id="voterPreview" class="preview-image" alt="Voter ID Preview">
-        </div>
-        
-        <button type="submit" class="submit-btn">Process Documents</button>
-    </form>
-    
-    <div id="result"></div>
-    
-    <!-- Add progress bar -->
-    <div id="progressContainer" style="display: none; margin: 20px 0;">
-        <div style="width: 100%; background-color: #f0f0f0; border-radius: 4px; padding: 2px;">
-            <div id="progressBar" style="width: 0%; height: 20px; background-color: #4CAF50; border-radius: 4px; transition: width 0.3s;"></div>
-        </div>
-        <p id="progressMessage" style="margin-top: 10px; text-align: center;"></p>
+  <div class="container">
+    <h1>AI Agent Form Assistant</h1>
+    <p class="subtitle">An AI Agent that fills out forms for you, starting with Voter ID. This is just the beginning!</p>
+
+    <div class="ai-banner">
+      Fill Voter ID Form with AI Agent  
+      <br>
+      <small>This is a prototype for one form. In the future, every form can be auto-filled accurately!</small>
     </div>
-    
-    <iframe id="pdfViewer" style="display: none; width: 100%; height: 800px; border: none;"></iframe>
 
-    <script>
-        function previewImage(input, previewId) {
-            const preview = document.getElementById(previewId);
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
+    <form id="uploadForm" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="aadhaarFront">Aadhaar Front Image</label>
+        <input type="file" id="aadhaarFront" name="aadhaarFront" accept="image/*" required class="file-input" onchange="previewImage(this, 'aadhaarFrontPreview')">
+        <img id="aadhaarFrontPreview" class="preview-image" alt="Aadhaar Front Preview">
+      </div>
+
+      <div class="form-group">
+        <label for="aadhaarBack">Aadhaar Back Image</label>
+        <input type="file" id="aadhaarBack" name="aadhaarBack" accept="image/*" required class="file-input" onchange="previewImage(this, 'aadhaarBackPreview')">
+        <img id="aadhaarBackPreview" class="preview-image" alt="Aadhaar Back Preview">
+      </div>
+
+      <button type="submit" class="submit-btn">Process Documents</button>
+    </form>
+
+    <div id="result"></div>
+
+    <div id="progressContainer">
+      <div><div id="progressBar"></div></div>
+      <p id="progressMessage"></p>
+    </div>
+
+    <iframe id="pdfViewer"></iframe>
+  </div>
+
+  <script>
+    function previewImage(input, previewId) {
+      const preview = document.getElementById(previewId);
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
         }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
 
-        // Add function to check processing status
-        async function checkStatus() {
-            try {
-                const response = await fetch('/status');
-                const data = await response.json();
-                
-                const progressContainer = document.getElementById('progressContainer');
-                const progressBar = document.getElementById('progressBar');
-                const progressMessage = document.getElementById('progressMessage');
-                
-                progressContainer.style.display = 'block';
-                progressBar.style.width = `${data.progress}%`;
-                progressMessage.textContent = data.message;
-                
-                if (data.status === 'processing') {
-                    setTimeout(checkStatus, 1000);
-                } else if (data.status === 'error') {
-                    progressContainer.style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Error checking status:', error);
-            }
+    async function checkStatus() {
+      try {
+        const response = await fetch('/status');
+        const data = await response.json();
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressMessage = document.getElementById('progressMessage');
+        
+        progressContainer.style.display = 'block';
+        progressBar.style.width = `${data.progress}%`;
+        progressMessage.textContent = data.message;
+        
+        if (data.status === 'processing') {
+          setTimeout(checkStatus, 1000);
+        } else if (data.status === 'error') {
+          progressContainer.style.display = 'none';
         }
+      } catch (error) {
+        console.error('Error checking status:', error);
+      }
+    }
 
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const resultDiv = document.getElementById('result');
-            const pdfViewer = document.getElementById('pdfViewer');
-            const progressContainer = document.getElementById('progressContainer');
-            
-            try {
-                progressContainer.style.display = 'block';
-                checkStatus(); // Start checking status
-                
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    resultDiv.className = 'success';
-                    resultDiv.textContent = data.message;
-                    
-                    // Display the PDF
-                    if (data.pdfUrl) {
-                        pdfViewer.src = data.pdfUrl;
-                        pdfViewer.style.display = 'block';
-                    }
-                } else {
-                    resultDiv.className = 'error';
-                    resultDiv.textContent = data.error || 'An error occurred';
-                    pdfViewer.style.display = 'none';
-                }
-            } catch (error) {
-                resultDiv.className = 'error';
-                resultDiv.textContent = 'An error occurred while processing the request';
-                pdfViewer.style.display = 'none';
-            }
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const resultDiv = document.getElementById('result');
+      const pdfViewer = document.getElementById('pdfViewer');
+      const progressContainer = document.getElementById('progressContainer');
+      
+      try {
+        progressContainer.style.display = 'block';
+        checkStatus();
+        
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
         });
-    </script>
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.className = 'success';
+          resultDiv.textContent = data.message;
+          resultDiv.style.display = 'block';
+          if (data.pdfUrl) {
+            pdfViewer.src = data.pdfUrl;
+            pdfViewer.style.display = 'block';
+          }
+        } else {
+          resultDiv.className = 'error';
+          resultDiv.textContent = data.error || 'An error occurred';
+          resultDiv.style.display = 'block';
+          pdfViewer.style.display = 'none';
+        }
+      } catch (error) {
+        resultDiv.className = 'error';
+        resultDiv.textContent = 'An error occurred while processing the request';
+        resultDiv.style.display = 'block';
+        pdfViewer.style.display = 'none';
+      }
+    });
+  </script>
 </body>
 </html>
-
