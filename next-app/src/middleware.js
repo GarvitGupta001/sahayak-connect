@@ -22,7 +22,6 @@ export async function middleware(request) {
 
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
         const { payload: decoded } = await jwtVerify(token, secret);
-        console.log(decoded);
 
         const headers = new Headers(request.headers);
         headers.set("user", JSON.stringify(decoded));

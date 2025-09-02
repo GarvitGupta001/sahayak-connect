@@ -92,7 +92,6 @@ export default function DetailsForm() {
             },
             location,
         };
-        console.log(user);
         const response = await axios.post(
             `/api/user-details/${user._id}`,
             allFormData,
@@ -102,7 +101,6 @@ export default function DetailsForm() {
                 },
             }
         );
-        console.log(response.data);
         router.replace("/app/home");
         localStorage.removeItem("personalDetails");
         localStorage.removeItem("demographics");

@@ -1,4 +1,5 @@
 import { UserProvider } from "@/context/UserContext";
+import ChatProvider from "@/context/ChatContext";
 import "./globals.css";
 
 export default function RootLayout({ children }) {
@@ -9,7 +10,9 @@ export default function RootLayout({ children }) {
                 <link rel="icon" href="/sahaayaklogo%20(1).png" />
             </head>
             <body>
-                <UserProvider>{children}</UserProvider>
+                <UserProvider>
+                    <ChatProvider>{children}</ChatProvider>
+                </UserProvider>
             </body>
         </html>
     );

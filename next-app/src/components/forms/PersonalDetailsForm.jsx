@@ -8,8 +8,6 @@ import { useUserContext } from "@/hooks/useUserContext";
 export default function PersonalDetailsForm() {
     const { personalDetails, setPersonalDetails } = useUserContext();
     const onChange = (e) => {
-        console.log(e.target.value);
-        console.log(personalDetails)
         const { id, value, checked, type } = e.target;
         let fieldValue;
 

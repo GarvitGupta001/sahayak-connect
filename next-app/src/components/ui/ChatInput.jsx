@@ -27,9 +27,7 @@ const ChatInput = ({ onSend, disabled }) => {
     const startRecording = async () => {
         const currentText = textInput.trim();
         const prefix = currentText ? currentText + " " : "";
-        console.log("Prefix:", prefix);
         transcriptRef.current = prefix;
-        console.log("Attempting to start recording...");
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: true,
@@ -50,11 +48,9 @@ const ChatInput = ({ onSend, disabled }) => {
             deepgramConnectionRef.current = connection;
 
             connection.on(LiveTranscriptionEvents.Open, () => {
-                console.log("✅ Deepgram connection opened.");
 
                 keepAliveIntervalRef.current = setInterval(() => {
                     if (deepgramConnectionRef.current?.getReadyState() === 1) {
-                        console.log("ping: Sending keep-alive signal.");
                         deepgramConnectionRef.current.keepAlive();
                     }
                 }, 10000);
@@ -85,10 +81,6 @@ const ChatInput = ({ onSend, disabled }) => {
                         event.data.size > 0 &&
                         connection.getReadyState() === 1
                     ) {
-                        // Log the size of the audio chunk being sent
-                        console.log(
-                            `🎤 Sending audio data chunk: ${event.data.size} bytes`
-                        );
                         connection.send(event.data);
                     }
                 };
@@ -102,7 +94,6 @@ const ChatInput = ({ onSend, disabled }) => {
     };
 
     const stopRecording = () => {
-        console.log("Stopping recording and cleaning up...");
         if (keepAliveIntervalRef.current) {
             clearInterval(keepAliveIntervalRef.current);
             keepAliveIntervalRef.current = null;

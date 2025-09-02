@@ -6,9 +6,10 @@ import ChatLoading from "@/components/ui/ChatLoading";
 import ChatError from "@/components/ui/ChatError";
 import ChatSuccess from "@/components/ui/ChatSuccess";
 import { RESPONSE_STATUS } from "@/constants/responseStatus";
+import useChatContext from "@/hooks/useChatContext";
 
 const Home = () => {
-    const [chats, setChats] = useState([]);
+    const { chats, setChats } = useChatContext();
     const [chatDisabled, setChatDisabled] = useState(false);
 
     const ML_PROXY = "/api/ml/suggest"; // internal proxy endpoint
@@ -23,25 +24,7 @@ const Home = () => {
             const json = await res.json();
             if (!json.success)
                 throw new Error(json.error || "ML service error");
-            const array = Array.isArray(json.data) ? json.data : [];
-            const schemeIds = array.map((d) => d.scheme_id).filter(Boolean);
-            if (schemeIds.length === 0) {
-                return {
-                    success: true,
-                    data: {
-                        schemes: [],
-                        rawIds: [],
-                        note: "No scheme matches found.",
-                    },
-                };
-            }
-            // Batch fetch using new ids param
-            const detailsRes = await fetch(
-                `/api/schemes?ids=${encodeURIComponent(schemeIds.join(","))}`
-            );
-            const detailsJson = await detailsRes.json();
-            const schemes = detailsJson.success ? detailsJson.data : [];
-            return { success: true, data: { schemes, rawIds: schemeIds } };
+            return json
         } catch (e) {
             console.error(e);
             return {
@@ -61,7 +44,6 @@ const Home = () => {
             status: RESPONSE_STATUS.FETCHING,
         };
         setInput("");
-        console.log(chat);
         setChats((chats) => [...chats, chat]);
         setChatDisabled(true);
         const response = await getMLResponse(input);
@@ -124,7 +106,7 @@ const Home = () => {
                                 case RESPONSE_STATUS.FETCHING:
                                     return <ChatLoading />;
                                 case RESPONSE_STATUS.FETCHED:
-                                    return <ChatSuccess message={chat.bot} />;
+                                    return <ChatSuccess schemes={chat.bot} />;
                                 case RESPONSE_STATUS.FAILED_FETCH:
                                     return <ChatError />;
                                 default:
