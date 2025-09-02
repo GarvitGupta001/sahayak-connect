@@ -82,8 +82,8 @@ class EnhancedOCRExtractor:
         """Enhanced Aadhaar information extraction"""
         try:
             if not self.reader:
-                logging.warning("OCR reader not available, using mock data")
-                return self._get_mock_aadhaar_data()
+                logging.error("OCR reader not available - ensure EasyOCR and dependencies are installed")
+                raise RuntimeError("OCR reader not available")
             
             # Extract text from image
             results = self.reader.readtext(image_path)
@@ -99,7 +99,9 @@ class EnhancedOCRExtractor:
                 'name': self._extract_name_enhanced(cleaned_text, text),
                 'aadhaar_number': self._extract_aadhaar_number(cleaned_text),
                 'dob': self._extract_date_of_birth(cleaned_text),
-                'gender': self._extract_gender(cleaned_text)
+                'gender': self._extract_gender(cleaned_text),
+                # Try to extract address if present (useful for Aadhaar Back)
+                'address': self._extract_address(cleaned_text)
             }
             
             # Validate and clean extracted data
@@ -111,14 +113,14 @@ class EnhancedOCRExtractor:
         except Exception as e:
             logging.error(f"Error extracting Aadhaar info: {e}")
             logging.error(traceback.format_exc())
-            return self._get_mock_aadhaar_data()
+            raise
     
     def extract_voter_info(self, image_path: str) -> Dict[str, str]:
         """Enhanced voter ID information extraction"""
         try:
             if not self.reader:
-                logging.warning("OCR reader not available, using mock data")
-                return self._get_mock_voter_data()
+                logging.error("OCR reader not available - ensure EasyOCR and dependencies are installed")
+                raise RuntimeError("OCR reader not available")
             
             # Extract text from image
             results = self.reader.readtext(image_path)
@@ -145,7 +147,7 @@ class EnhancedOCRExtractor:
         except Exception as e:
             logging.error(f"Error extracting voter info: {e}")
             logging.error(traceback.format_exc())
-            return self._get_mock_voter_data()
+            raise
     
     def _clean_ocr_text(self, text: str) -> str:
         """Clean OCR text by removing noise and normalizing"""
@@ -372,18 +374,19 @@ def upload_documents():
     """Enhanced document upload and processing"""
     global processing_status
     
-    if 'aadhaar' not in request.files or 'voter' not in request.files:
-        return jsonify({'error': 'Please upload both Aadhaar and Voter ID'}), 400
-    
-    aadhaar = request.files['aadhaar']
-    voter = request.files['voter']
-    
-    if aadhaar.filename == '' or voter.filename == '':
+    # ✅ Fixed (matches your frontend fields)
+    if 'aadhaarFront' not in request.files or 'aadhaarBack' not in request.files:
+        return jsonify({'error': 'Please upload both Aadhaar Front and Aadhaar Back'}), 400
+
+    aadhaar = request.files['aadhaarFront']
+    aadhaar_back = request.files['aadhaarBack']
+
+    if aadhaar.filename == '' or aadhaar_back.filename == '':
         return jsonify({'error': 'No selected files'}), 400
     
     # Initialize file paths for cleanup
     aadhaar_path = None
-    voter_path = None
+    aadhaar_back_path = None
     
     try:
         # Reset processing status
@@ -393,60 +396,53 @@ def upload_documents():
             'message': 'Starting document processing...'
         })
         
-        # Ensure uploads directory exists
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
         
-        # Update status
         processing_status.update({
             'progress': 10,
             'message': 'Saving uploaded files...'
         })
         
-        # Save uploaded files with secure filenames
+        # Save Aadhaar Front and Back
         aadhaar_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(aadhaar.filename))
-        voter_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(voter.filename))
+        aadhaar_back_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(aadhaar_back.filename))
         
         aadhaar.save(aadhaar_path)
-        voter.save(voter_path)
+        aadhaar_back.save(aadhaar_back_path)
         
-        # Verify files were saved
-        if not os.path.exists(aadhaar_path) or not os.path.exists(voter_path):
+        if not os.path.exists(aadhaar_path) or not os.path.exists(aadhaar_back_path):
             raise FileNotFoundError("Failed to save uploaded files")
         
-        logging.info(f"Files saved: {aadhaar_path}, {voter_path}")
+        logging.info(f"Files saved: {aadhaar_path}, {aadhaar_back_path}")
         
-        # Update status
         processing_status.update({
             'progress': 30,
-            'message': 'Extracting information from Aadhaar...'
+            'message': 'Extracting information from Aadhaar Front...'
         })
         
-        # Extract information using enhanced OCR
+        # Extract Aadhaar front
         aadhaar_data = ocr_extractor.extract_aadhaar_info(aadhaar_path)
         
         processing_status.update({
             'progress': 50,
-            'message': 'Extracting information from Voter ID...'
+            'message': 'Extracting information from Aadhaar Back...'
         })
         
-        voter_data = ocr_extractor.extract_voter_info(voter_path)
+        # Extract Aadhaar back (no voter extraction now, just reuse Aadhaar extractor)
+        aadhaar_back_data = ocr_extractor.extract_aadhaar_info(aadhaar_back_path)
         
         processing_status.update({
             'progress': 70,
             'message': 'Filling FORM6 with enhanced mapping...'
         })
         
-        # Use enhanced FORM6 filler
         try:
             form6_filler = EnhancedForm6Filler('FORM6.pdf')
-            
-            # Prepare data for enhanced filler
             extracted_data = {
                 'aadhaar_data': aadhaar_data,
-                'voter_data': voter_data
+                'aadhaar_back_data': aadhaar_back_data
             }
             
-            # Fill the form with enhanced processing
             filled_form_path = form6_filler.fill_form6_enhanced(
                 extracted_data, 
                 'enhanced_filled_form.pdf'
@@ -461,13 +457,12 @@ def upload_documents():
                 
                 logging.info(f"Enhanced FORM6 created: {filled_form_path}")
                 
-                # Return success response
                 return jsonify({
                     'message': 'Documents processed successfully with enhanced form filling',
                     'pdfUrl': '/view-pdf',
                     'extractedData': {
-                        'aadhaar': aadhaar_data,
-                        'voter': voter_data
+                        'aadhaar_front': aadhaar_data,
+                        'aadhaar_back': aadhaar_back_data
                     }
                 })
             else:
@@ -492,7 +487,7 @@ def upload_documents():
     
     finally:
         # Clean up uploaded files
-        for file_path in [aadhaar_path, voter_path]:
+        for file_path in [aadhaar_path, aadhaar_back_path]:
             if file_path and os.path.exists(file_path):
                 try:
                     os.remove(file_path)
@@ -501,23 +496,43 @@ def upload_documents():
                     logging.warning(f"Failed to cleanup {file_path}: {cleanup_error}")
 
 
+from flask import send_file, jsonify
+import os
+import logging
+
 @app.route('/view-pdf')
 def view_pdf():
-    """Serve the filled PDF"""
+    """Serve the most recently modified filled PDF file inline with no-cache headers."""
     pdf_paths = [
         'enhanced_filled_form.pdf',
-        'filled_form.pdf',
-        'enhanced_filled_form6.pdf'
+        'enhanced_filled_form6.pdf',
+        'filled_form.pdf'
     ]
-    
-    for pdf_path in pdf_paths:
-        if os.path.exists(pdf_path):
-            logging.info(f"Serving PDF: {pdf_path}")
-            return send_file(os.path.abspath(pdf_path), mimetype='application/pdf')
-    
-    logging.error("No filled PDF found")
-    return jsonify({'error': 'PDF not found'}), 404
 
+    # Filter only existing PDFs
+    existing_pdfs = [p for p in pdf_paths if os.path.exists(p)]
+
+    if not existing_pdfs:
+        logging.error("No filled PDF found")
+        return jsonify({'error': 'PDF not found'}), 404
+
+    # Get the most recent one by modification time
+    latest_pdf = max(existing_pdfs, key=os.path.getmtime)
+    logging.info(f"Serving latest PDF: {latest_pdf}")
+
+    response = send_file(
+        os.path.abspath(latest_pdf),
+        mimetype='application/pdf',
+        as_attachment=False,
+        download_name=os.path.basename(latest_pdf)
+    )
+    # Prevent caching to always show latest PDF
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    # Ensure inline display
+    response.headers['Content-Disposition'] = f"inline; filename=\"{os.path.basename(latest_pdf)}\""
+    return response
 
 @app.route('/debug/files')
 def debug_files():
@@ -621,6 +636,23 @@ def handle_exception(e):
     
     return jsonify({'error': f'Server error: {str(e)}'}), 500
 
+
+# Favicon route to avoid 500 errors in console
+@app.route('/favicon.ico')
+def favicon():
+    try:
+        # Serve a tiny blank icon dynamically
+        from io import BytesIO
+        from PIL import Image
+        img = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+        buf = BytesIO()
+        img.save(buf, format='ICO')
+        buf.seek(0)
+        return send_file(buf, mimetype='image/x-icon')
+    except Exception:
+        # If PIL not available, return 204 No Content
+        from flask import Response
+        return Response(status=204)
 
 if __name__ == '__main__':
     logging.info("Starting Enhanced Flask Server for FORM6 Processing")

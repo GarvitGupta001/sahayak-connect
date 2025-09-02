@@ -76,7 +76,7 @@
     }
 
     .submit-btn {
-      background: #002b3c;
+      background: #03002b;
       color: #fff;
       padding: 14px;
       font-size: 1rem;
@@ -89,7 +89,7 @@
     }
 
     .submit-btn:hover {
-      background: #427e9f;
+      background: #100043;
     }
 
     #result {
@@ -126,7 +126,7 @@
     }
 
     #progressBar {
-      background: #4caf50;
+      background: #015103;
       height: 16px;
       width: 0%;
       transition: width 0.3s;
@@ -183,7 +183,8 @@
       <p id="progressMessage"></p>
     </div>
 
-    <iframe id="pdfViewer"></iframe>
+    <object id="pdfObject" type="application/pdf" data="" style="display:none; width:100%; height:80vh; border:none; border-radius:6px;"></object>
+    <div id="pdfCanvasContainer" style="display:none; width:100%; margin-top:10px;"></div>
   </div>
 
   <script>
@@ -208,7 +209,9 @@
         const progressMessage = document.getElementById('progressMessage');
         
         progressContainer.style.display = 'block';
-        progressBar.style.width = `${data.progress}%`;
+        const pct = Math.max(0, Math.min(100, Number(data.progress) || 0));
+        progressBar.style.width = `${pct}%`;
+        progressBar.style.background = pct > 0 ? '#4caf50' : '#ddd';
         progressMessage.textContent = data.message;
         
         if (data.status === 'processing') {
@@ -225,8 +228,41 @@
       e.preventDefault();
       const formData = new FormData(e.target);
       const resultDiv = document.getElementById('result');
-      const pdfViewer = document.getElementById('pdfViewer');
+      const pdfObject = document.getElementById('pdfObject');
+      const canvasContainer = document.getElementById('pdfCanvasContainer');
       const progressContainer = document.getElementById('progressContainer');
+
+      async function renderPdfWithPdfJs(url) {
+        try {
+          if (!window['pdfjsLib']) return;
+          const pdfjsLib = window['pdfjsLib'];
+          if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          }
+          const loadingTask = pdfjsLib.getDocument(url);
+          const pdf = await loadingTask.promise;
+          const page = await pdf.getPage(1);
+          const containerWidth = canvasContainer.clientWidth || document.querySelector('.container').clientWidth || 500;
+          const baseViewport = page.getViewport({ scale: 1 });
+          const scale = Math.min(2, Math.max(0.8, containerWidth / baseViewport.width));
+          const viewport = page.getViewport({ scale });
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          canvas.style.borderRadius = '6px';
+          canvas.style.width = '100%';
+          canvas.style.height = 'auto';
+          canvasContainer.innerHTML = '';
+          canvasContainer.appendChild(canvas);
+          canvasContainer.style.display = 'block';
+          await page.render({ canvasContext: context, viewport }).promise;
+          // Scroll to canvas when rendered
+          canvasContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (e) {
+          console.error('PDF.js render error', e);
+        }
+      }
       
       try {
         progressContainer.style.display = 'block';
@@ -244,22 +280,33 @@
           resultDiv.textContent = data.message;
           resultDiv.style.display = 'block';
           if (data.pdfUrl) {
-            pdfViewer.src = data.pdfUrl;
-            pdfViewer.style.display = 'block';
+            const url = `${data.pdfUrl}?ts=${Date.now()}`;
+            // Set both object data and an embed fallback for better compatibility
+            pdfObject.setAttribute('data', url);
+            pdfObject.innerHTML = `<embed src="${url}" type="application/pdf" width="100%" height="500px" />`;
+            pdfObject.style.display = 'block';
+            // Hide progress bar once complete and scroll to the PDF
+            progressContainer.style.display = 'none';
+            pdfObject.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Additionally render via PDF.js canvas for maximum compatibility
+            renderPdfWithPdfJs(url);
           }
         } else {
           resultDiv.className = 'error';
           resultDiv.textContent = data.error || 'An error occurred';
           resultDiv.style.display = 'block';
-          pdfViewer.style.display = 'none';
+          pdfObject.style.display = 'none';
+          canvasContainer.style.display = 'none';
         }
       } catch (error) {
         resultDiv.className = 'error';
         resultDiv.textContent = 'An error occurred while processing the request';
         resultDiv.style.display = 'block';
-        pdfViewer.style.display = 'none';
+        pdfObject.style.display = 'none';
+        canvasContainer.style.display = 'none';
       }
     });
   </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>

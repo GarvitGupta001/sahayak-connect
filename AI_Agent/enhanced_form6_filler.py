@@ -416,6 +416,12 @@ class EnhancedOCRProcessor:
         if aadhaar_data:
             processed.update(self._process_aadhaar_data(aadhaar_data))
         
+        # Extract and clean Aadhaar BACK data (address lives here typically)
+        aadhaar_back_data = raw_data.get('aadhaar_back_data', {})
+        if aadhaar_back_data:
+            # Reuse voter-data pipeline to parse address components
+            processed.update(self._process_voter_data(aadhaar_back_data))
+
         # Extract and clean voter data
         voter_data = raw_data.get('voter_data', {})
         if voter_data:

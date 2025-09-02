@@ -1,17 +1,21 @@
 # Core Flask dependencies
-Flask>=2.3.2
-flask-cors>=4.0.0
-Werkzeug>=2.3.6
+Flask==3.1.2
+flask-cors==6.0.1
+Werkzeug==3.1.3
 
-# OCR and Image Processing
-easyocr>=1.7.0
-opencv-python>=4.8.0.74
-Pillow>=10.0.0
-numpy>=1.24.3
+# OCR and Image Processing (pinned to known-good combo for Py 3.12 on Windows)
+easyocr==1.7.1
+opencv-python-headless==4.10.0.84
+Pillow==11.3.0
+# PyTorch 2.3.x is incompatible with NumPy 2.x; use 1.26.x
+numpy==1.26.4
+torch==2.3.1
+torchvision==0.18.1
+scikit-image==0.25.2
 
 # PDF Processing
-PyPDF2>=3.0.1
-reportlab>=4.0.4
+PyPDF2==3.0.1
+reportlab==4.4.3
 
 # Other utilities
-python-dotenv>=1.0.0
+python-dotenv==1.1.1
