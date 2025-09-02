@@ -601,6 +601,15 @@ class EnhancedOCRProcessor:
         
         result = {}
         address = raw_address.strip()
+
+        # Normalize separators and known Aadhaar abbreviations
+        address = re.sub(r'\s+', ' ', address)
+        # Remove common headers like C/O, S/O, W/O while keeping following name
+        address = re.sub(r'\b(C/O|S/O|W/O)\s*', '', address, flags=re.IGNORECASE)
+        # Normalize PO, PS, DIST labels to commas
+        address = re.sub(r'\bPO\s*:\s*', '', address, flags=re.IGNORECASE)
+        address = re.sub(r'\bDIST\s*:\s*', '', address, flags=re.IGNORECASE)
+        address = re.sub(r'\bSTATE\s*:\s*', '', address, flags=re.IGNORECASE)
         
         # Extract pin code
         pin_match = re.search(r'\b(\d{6})\b', address)
@@ -608,8 +617,8 @@ class EnhancedOCRProcessor:
             result['pin_code'] = pin_match.group(1)
             address = address.replace(pin_match.group(0), '').strip()
         
-        # Extract house number (at the beginning)
-        house_match = re.search(r'^([A-Za-z0-9\-/\s]+?)(?=,|\s+[A-Z])', address)
+        # Extract house/flat/plot at the beginning
+        house_match = re.search(r'^([A-Za-z0-9#\-/\s]+?)(?=,|\s+[A-Z])', address)
         if house_match:
             potential_house = house_match.group(1).strip()
             if len(potential_house) <= 20:  # Reasonable house number length

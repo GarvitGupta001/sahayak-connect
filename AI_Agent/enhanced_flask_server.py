@@ -271,21 +271,26 @@ class EnhancedOCRExtractor:
     
     def _extract_address(self, text: str) -> str:
         """Extract address information"""
-        # Look for address patterns
-        address_indicators = ['address', 'addr', 'residence', 'house']
-        
-        for indicator in address_indicators:
-            pattern = rf'{indicator}[:\s]*([A-Za-z0-9\s,.-]+?)(?:\n|$|\s{{5,}})'
-            match = re.search(pattern, text, re.IGNORECASE)
-            if match:
-                return match.group(1).strip()
-        
-        # Fallback: look for patterns with numbers and locality names
-        address_pattern = r'([A-Za-z0-9\s,.-]+(?:Road|Street|Lane|Avenue|Colony|Nagar|Block)[A-Za-z0-9\s,.-]*)'
-        match = re.search(address_pattern, text, re.IGNORECASE)
-        if match:
-            return match.group(1).strip()
-        
+        # Prefer block after 'Address' label up to VID or PIN or Aadhaar footer
+        patterns = [
+            r'Address\s*[:\-]?\s*([\s\S]*?)(?=VID\b|\b\d{6}\b|\bAadhaar\b|$)',
+            r'Addr\.?\s*[:\-]?\s*([\s\S]*?)(?=VID\b|\b\d{6}\b|\bAadhaar\b|$)'
+        ]
+        for pat in patterns:
+            m = re.search(pat, text, re.IGNORECASE)
+            if m:
+                block = m.group(1)
+                # Collapse whitespace, keep commas
+                block = re.sub(r'\s+', ' ', block)
+                return block.strip(' ,')
+
+        # Fallback: capture a line with locality keywords and a 6-digit PIN later
+        m = re.search(r'([A-Za-z0-9/, .-]{20,}?)(?:\s|-)?(\b\d{6}\b)', text)
+        if m:
+            pre, pin = m.groups()
+            pre = re.sub(r'\s+', ' ', pre)
+            return f"{pre.strip(' ,')} {pin}"
+
         return ''
     
     def _standardize_date(self, date_str: str) -> str:
@@ -502,7 +507,7 @@ import logging
 
 @app.route('/view-pdf')
 def view_pdf():
-    """Serve the most recently modified filled PDF file inline with no-cache headers."""
+    """Serve the most recently modified filled PDF file inline with explicit Content-Length and no-cache headers."""
     pdf_paths = [
         'enhanced_filled_form.pdf',
         'enhanced_filled_form6.pdf',
@@ -520,18 +525,26 @@ def view_pdf():
     latest_pdf = max(existing_pdfs, key=os.path.getmtime)
     logging.info(f"Serving latest PDF: {latest_pdf}")
 
+    pdf_abs = os.path.abspath(latest_pdf)
     response = send_file(
-        os.path.abspath(latest_pdf),
+        pdf_abs,
         mimetype='application/pdf',
         as_attachment=False,
-        download_name=os.path.basename(latest_pdf)
+        download_name=os.path.basename(latest_pdf),
+        conditional=False  # avoid Range/conditional responses causing length mismatch
     )
+    try:
+        response.headers['Content-Length'] = str(os.path.getsize(pdf_abs))
+    except Exception:
+        pass
     # Prevent caching to always show latest PDF
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
     # Ensure inline display
     response.headers['Content-Disposition'] = f"inline; filename=\"{os.path.basename(latest_pdf)}\""
+    # Disable etag to avoid proxy caching mismatches
+    response.headers.pop('ETag', None)
     return response
 
 @app.route('/debug/files')

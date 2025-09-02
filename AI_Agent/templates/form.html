@@ -17,7 +17,7 @@
 
     .container {
       width: 100%;
-      max-width: 500px;
+      max-width: 480px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -147,6 +147,24 @@
       margin-top: 15px;
       border-radius: 6px;
     }
+
+    /* Mobile enhancements */
+    @media (max-width: 480px) {
+      body { background: #fafafa; }
+      .container { padding: 16px; }
+      h1 { font-size: 1.4rem; }
+      p.subtitle { font-size: 0.9rem; }
+      .ai-banner { font-size: 0.95rem; padding: 10px; }
+      label { font-size: 0.95rem; }
+      .file-input { padding: 12px; font-size: 16px; }
+      .submit-btn { padding: 16px; font-size: 1.05rem; }
+      #progressMessage { font-size: 0.9rem; }
+      /* Show a taller PDF area on phones */
+      iframe { height: 70vh; }
+      #pdfCanvasContainer { min-height: 60vh; }
+      /* Larger tap targets for previews */
+      .preview-image { border-width: 1px; }
+    }
   </style>
 </head>
 <body>
@@ -236,8 +254,10 @@
         try {
           if (!window['pdfjsLib']) return;
           const pdfjsLib = window['pdfjsLib'];
-          if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          // Worker and font data for reliable mobile rendering
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          if (pdfjsLib.StandardFontDataFactory) {
+            pdfjsLib.GlobalWorkerOptions.standardFontDataUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/standard_fonts/';
           }
           const loadingTask = pdfjsLib.getDocument(url);
           const pdf = await loadingTask.promise;
@@ -261,6 +281,9 @@
           canvasContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } catch (e) {
           console.error('PDF.js render error', e);
+          // Fallback to native object/embed if canvas render fails
+          const pdfObject = document.getElementById('pdfObject');
+          pdfObject.style.display = 'block';
         }
       }
       
