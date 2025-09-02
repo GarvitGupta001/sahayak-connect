@@ -208,9 +208,20 @@ export default function PhoneHome() {
                         ))}
                     </div>
                 </div>
+                <div className="flex justify-center mt-10">
+                    <Link href={
+                            !user
+                                ? "/sign-in"
+                                : user.profileComplete
+                                ? "/app/home"
+                                : "/app/user-details"
+                        }>
+                        <button className="bg-slate-900 text-white px-8 md:px-16 py-3 rounded-full font-semibold hover:scale-105 transition"> Start Now </button>
+                    </Link>
+                </div>
             </section>
 
-            <footer className="text-center text-sm font-semibold text-gray-500 mt-10 pb-6">
+            <footer className="text-center text-sm font-semibold text-gray-500 mt-1 pb-6">
                 • Built with Care by Team SahaayakConnect •
             </footer>
         </div>

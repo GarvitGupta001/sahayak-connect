@@ -17,6 +17,8 @@ import axios from "axios";
 import { useUserContext } from "@/hooks/useUserContext";
 import Loader from "@/components/Loader";
 import GlassCard from '@/components/ui/GlassCard';
+import Image from "next/image";
+
 
 export default function SignIn() {
     const router = useRouter();
@@ -86,11 +88,17 @@ export default function SignIn() {
                 <Loader />
             ) : (
                 <Box className="min-h-screen my-6 mx-auto flex flex-col items-center gap-10 max-w-md px-4">
-                    <div className="flex flex-col items-center gap-3 mt-4">
-                    {/* <Image src="/sahaayaklogo%20(1).png" alt="Sahayak logo" width={160} height={160} priority className="w-40 h-auto" /> */}
-                        <h1 className="text-4xl md:text-5xl font-['TAN-Tangkiwood'] font-bold text-center leading-none">
-                            Sahayak<br/>Connect
-                        </h1>
+                    <div className="max-w-7xl mx-auto px-4 py-3 flex items-center">
+                        
+                            <Image
+                                src="/sahaayaklogo%20(1).png"
+                                alt="Sahayak Connect"
+                                width={170}
+                                height={86}
+                                priority
+                                className="h-12 w-auto"
+                            />
+                        
                     </div>
                     <GlassCard className="w-full">
                         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -158,23 +166,23 @@ export default function SignIn() {
                                     {errorMessage.password}
                                 </FormHelperText>
                             </FormControl>
-                                                        <Button
-                                                            type="submit"
-                                                            loading={loading}
-                                                            variant="contained"
-                                                            sx={{
-                                                                textTransform: 'none',
-                                                                borderRadius: '9999px',
-                                                                paddingY: '10px',
-                                                                fontWeight: 600,
-                                                                background: 'linear-gradient(to right,#0f172a,#1e3a8a)',
-                                                            }}
-                                                            fullWidth
-                                                        >
-                                                            Confirm
-                                                        </Button>
+                            <Button
+                                type="submit"
+                                loading={loading}
+                                variant="contained"
+                                sx={{
+                                    textTransform: 'none',
+                                    borderRadius: '9999px',
+                                    paddingY: '10px',
+                                    fontWeight: 600,
+                                    background: 'linear-gradient(to right,#0f172a,#1e3a8a)',
+                                }}
+                                fullWidth
+                            >
+                                Confirm
+                            </Button>
                         </form>
-                                        </GlassCard>
+                    </GlassCard>
                 </Box>
             )}
         </>
