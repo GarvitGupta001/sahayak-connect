@@ -1,0 +1,1 @@
+sentence_emb = np.array(sentence_emb_list)
